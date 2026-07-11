@@ -1,46 +1,49 @@
-# Graph Report - .  (2026-07-10)
+# Graph Report - .  (2026-07-11)
 
 ## Corpus Check
-- Corpus is ~9,921 words - fits in a single context window. You may not need a graph.
+- Corpus is ~23,890 words - fits in a single context window. You may not need a graph.
 
 ## Summary
-- 432 nodes · 549 edges · 21 communities (19 shown, 2 thin omitted)
+- 549 nodes · 797 edges · 24 communities (22 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- Guards y módulo admin
-- Bootstrap y configuración del API
-- Shell del frontend Next.js
-- Dependencias dev del API
-- Dependencias del frontend
-- Config TypeScript del frontend
-- Dependencias runtime del API
-- Catálogo maestro (endpoints)
-- Config TypeScript del API
-- Auth: controller y flujo JWT
-- Schemas Zod compartidos
-- Perfil de usuario (/mi)
-- Monorepo raíz y Biome
-- Paquete shared (manifiesto)
-- Config TypeScript de shared
-- Seeds del catálogo
-- Build config del API
-- Nest CLI
-- Página de inicio web
-- Tipos de Next.js
+- Community 0
+- Community 1
+- Community 2
+- Community 3
+- Community 4
+- Community 5
+- Community 6
+- Community 7
+- Community 8
+- Community 9
+- Community 10
+- Community 11
+- Community 12
+- Community 13
+- Community 14
+- Community 15
+- Community 16
+- Community 17
+- Community 18
+- Community 19
+- Community 20
+- Community 21
+- Community 22
 
 ## God Nodes (most connected - your core abstractions)
-1. `compilerOptions` - 19 edges
-2. `PrismaService` - 16 edges
-3. `compilerOptions` - 16 edges
-4. `AuthService` - 13 edges
-5. `CatalogoService` - 13 edges
-6. `CatalogoController` - 12 edges
-7. `compilerOptions` - 12 edges
-8. `scripts` - 11 edges
-9. `scripts` - 11 edges
-10. `AuthController` - 9 edges
+1. `PrismaService` - 26 edges
+2. `VehiculosService` - 22 edges
+3. `UsuarioAutenticado` - 21 edges
+4. `compilerOptions` - 19 edges
+5. `compilerOptions` - 16 edges
+6. `UsuarioActual` - 14 edges
+7. `AuthService` - 13 edges
+8. `CatalogoService` - 13 edges
+9. `CatalogoController` - 12 edges
+10. `MisVehiculosController` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `bootstrap()` --indirect_call--> `AppModule`  [INFERRED]
@@ -49,99 +52,111 @@
 ## Import Cycles
 - None detected.
 
-## Communities (21 total, 2 thin omitted)
+## Communities (24 total, 2 thin omitted)
 
-### Community 0 - "Guards y módulo admin"
+### Community 0 - "Community 0"
+Cohesion: 0.06
+Nodes (30): AppModule, Module, Env, envSchema, bootstrap(), AdminModule, Module, AuthModule (+22 more)
+
+### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (18): Injectable, ZodValidationPipe, AdminController, Controller, Get, Publico(), Roles(), SaludController (+10 more)
+Nodes (25): AuditoriaService, RegistroAuditoria, Injectable, AdminController, Controller, Get, Roles, Roles() (+17 more)
 
-### Community 1 - "Bootstrap y configuración del API"
-Cohesion: 0.09
-Nodes (21): AppModule, Module, Env, envSchema, bootstrap(), AdminModule, Module, AuthModule (+13 more)
+### Community 2 - "Community 2"
+Cohesion: 0.05
+Nodes (37): LoginInput, loginSchema, PerfilUpdateInput, perfilUpdateSchema, RefreshInput, refreshSchema, RegistroInput, registroSchema (+29 more)
 
-### Community 2 - "Shell del frontend Next.js"
+### Community 3 - "Community 3"
+Cohesion: 0.13
+Nodes (17): UsuarioAutenticado, UsuarioActual, Body, Ip, Param, MisVehiculosController, Body, Controller (+9 more)
+
+### Community 4 - "Community 4"
 Cohesion: 0.06
 Nodes (31): metadata, nextConfig, files, includes, formatter, enabled, indentStyle, indentWidth (+23 more)
 
-### Community 3 - "Dependencias dev del API"
+### Community 5 - "Community 5"
 Cohesion: 0.06
 Nodes (31): devDependencies, @nestjs/cli, @nestjs/testing, prisma, tsx, @types/express, @types/node, typescript (+23 more)
 
-### Community 4 - "Dependencias del frontend"
+### Community 6 - "Community 6"
 Cohesion: 0.07
 Nodes (29): dependencies, @concesionario/shared, next, react, react-dom, devDependencies, tailwindcss, @tailwindcss/postcss (+21 more)
 
-### Community 5 - "Config TypeScript del frontend"
+### Community 7 - "Community 7"
 Cohesion: 0.07
 Nodes (28): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+20 more)
 
-### Community 6 - "Dependencias runtime del API"
+### Community 8 - "Community 8"
+Cohesion: 0.11
+Nodes (14): Injectable, ZodValidationPipe, Publico(), LeadsController, Body, Controller, HttpCode, Post (+6 more)
+
+### Community 9 - "Community 9"
+Cohesion: 0.13
+Nodes (7): CatalogoController, Controller, Get, Param, Publico, CatalogoService, Injectable
+
+### Community 10 - "Community 10"
 Cohesion: 0.08
 Nodes (25): dependencies, argon2, @concesionario/shared, dotenv, @nestjs/common, @nestjs/core, @nestjs/jwt, @nestjs/platform-express (+17 more)
 
-### Community 7 - "Catálogo maestro (endpoints)"
-Cohesion: 0.14
-Nodes (7): CatalogoController, Controller, Get, Publico, CatalogoService, Injectable, Param
-
-### Community 8 - "Config TypeScript del API"
+### Community 11 - "Community 11"
 Cohesion: 0.08
 Nodes (24): compilerOptions, allowSyntheticDefaultImports, baseUrl, declaration, emitDecoratorMetadata, esModuleInterop, experimentalDecorators, forceConsistentCasingInFileNames (+16 more)
 
-### Community 9 - "Auth: controller y flujo JWT"
+### Community 12 - "Community 12"
 Cohesion: 0.20
-Nodes (9): AuthController, Body, Controller, Publico, AuthService, Injectable, HttpCode, Post (+1 more)
+Nodes (9): AuthController, Body, Controller, HttpCode, Post, Publico, Throttle, AuthService (+1 more)
 
-### Community 10 - "Schemas Zod compartidos"
-Cohesion: 0.11
-Nodes (17): LoginInput, loginSchema, PerfilUpdateInput, perfilUpdateSchema, RefreshInput, refreshSchema, RegistroInput, registroSchema (+9 more)
-
-### Community 11 - "Perfil de usuario (/mi)"
-Cohesion: 0.16
-Nodes (11): UsuarioAutenticado, UsuarioActual, MiController, Body, Controller, Get, Module, UsuariosModule (+3 more)
-
-### Community 12 - "Monorepo raíz y Biome"
+### Community 13 - "Community 13"
 Cohesion: 0.10
 Nodes (19): @biomejs/biome, devDependencies, @biomejs/biome, engines, node, name, packageManager, private (+11 more)
 
-### Community 13 - "Paquete shared (manifiesto)"
+### Community 14 - "Community 14"
 Cohesion: 0.11
 Nodes (17): dependencies, zod, devDependencies, typescript, vitest, typescript, vitest, zod (+9 more)
 
-### Community 14 - "Config TypeScript de shared"
+### Community 15 - "Community 15"
 Cohesion: 0.11
 Nodes (17): compilerOptions, declaration, esModuleInterop, forceConsistentCasingInFileNames, lib, module, moduleResolution, outDir (+9 more)
 
-### Community 15 - "Seeds del catálogo"
+### Community 16 - "Community 16"
 Cohesion: 0.21
 Nodes (14): main(), prisma, seedCaracteristicas(), seedMarcasYModelos(), seedSimples(), seedTipoCambio(), seedUbicaciones(), slugify() (+6 more)
 
-### Community 16 - "Build config del API"
+### Community 17 - "Community 17"
+Cohesion: 0.17
+Nodes (8): MiController, Body, Controller, Get, Put, PERFIL_SELECT, Injectable, UsuariosService
+
+### Community 18 - "Community 18"
+Cohesion: 0.21
+Nodes (6): Controller, Get, Param, Publico, VehiculosPublicoController, Query
+
+### Community 19 - "Community 19"
 Cohesion: 0.20
 Nodes (9): exclude, extends, include, dist, node_modules, src/**/*, **/*.spec.ts, test (+1 more)
 
-### Community 17 - "Nest CLI"
+### Community 20 - "Community 20"
 Cohesion: 0.29
 Nodes (6): collection, compilerOptions, deleteOutDir, tsConfigPath, $schema, sourceRoot
 
 ## Knowledge Gaps
-- **183 isolated node(s):** `$schema`, `collection`, `sourceRoot`, `deleteOutDir`, `tsConfigPath` (+178 more)
+- **206 isolated node(s):** `$schema`, `collection`, `sourceRoot`, `deleteOutDir`, `tsConfigPath` (+201 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PrismaService` connect `Guards y módulo admin` to `Bootstrap y configuración del API`, `Perfil de usuario (/mi)`, `Catálogo maestro (endpoints)`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `AuthController` connect `Auth: controller y flujo JWT` to `Guards y módulo admin`, `Bootstrap y configuración del API`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `PrismaService` connect `Community 1` to `Community 0`, `Community 3`, `Community 8`, `Community 9`, `Community 17`?**
+  _High betweenness centrality (0.043) - this node is a cross-community bridge._
+- **Why does `VehiculosService` connect `Community 3` to `Community 0`, `Community 1`, `Community 18`, `Community 8`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `UsuarioAutenticado` connect `Community 3` to `Community 0`, `Community 1`, `Community 17`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **What connects `$schema`, `collection`, `sourceRoot` to the rest of the system?**
-  _184 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Guards y módulo admin` be split into smaller, more focused modules?**
-  _Cohesion score 0.07057057057057058 - nodes in this community are weakly interconnected._
-- **Should `Bootstrap y configuración del API` be split into smaller, more focused modules?**
-  _Cohesion score 0.0873015873015873 - nodes in this community are weakly interconnected._
-- **Should `Shell del frontend Next.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
-- **Should `Dependencias dev del API` be split into smaller, more focused modules?**
-  _Cohesion score 0.0625 - nodes in this community are weakly interconnected._
+  _207 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.06471631205673758 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.06553911205073996 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.05204872646733112 - nodes in this community are weakly interconnected._

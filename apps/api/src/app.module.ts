@@ -6,8 +6,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { ModeracionModule } from './modules/moderacion/moderacion.module';
 import { SaludModule } from './modules/salud/salud.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { VehiculosModule } from './modules/vehiculos/vehiculos.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -20,6 +23,9 @@ import { PrismaModule } from './prisma/prisma.module';
     CatalogoModule,
     SaludModule,
     AdminModule,
+    VehiculosModule,
+    ModeracionModule,
+    LeadsModule,
   ],
   providers: [
     // Orden: throttling → autenticación → autorización por rol.
