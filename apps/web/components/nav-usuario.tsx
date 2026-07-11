@@ -38,6 +38,11 @@ export function NavUsuario() {
 
   return (
     <>
+      {usuario.rol === 'admin' && (
+        <Link href="/admin/moderacion" className="hover:text-quetzal">
+          Moderación
+        </Link>
+      )}
       {PUEDE_VENDER.has(usuario.rol) && (
         <Link href="/panel" className="hover:text-quetzal">
           Mis anuncios
