@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+@theme {
+  /* Paleta: papel frío + tinta verde-negra + verde quetzal como único acento.
+     El ámbar queda reservado para anuncios destacados. */
+  --color-papel: #f6f7f4;
+  --color-tinta: #182420;
+  --color-musgo: #4c5a52;
+  --color-borde: #dde2dc;
+  --color-quetzal: #0e7c4a;
+  --color-quetzal-oscuro: #0a5f39;
+  --color-ambar: #e8a13d;
+
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-display: var(--font-archivo-narrow), var(--font-archivo), sans-serif;
+}
+
+/* Los precios y cifras siempre con numerales tabulares: columnas que alinean */
+.cifra {
+  font-variant-numeric: tabular-nums;
+}

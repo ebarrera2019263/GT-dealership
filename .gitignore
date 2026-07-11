@@ -26,3 +26,7 @@ coverage/
 # archivos internos de trabajo no
 graphify-out/.graphify_*
 graphify-out/cache/
+
+# Artefactos de pruebas de navegador (solo capturas sueltas en la raíz)
+.playwright-mcp/
+/*.png
