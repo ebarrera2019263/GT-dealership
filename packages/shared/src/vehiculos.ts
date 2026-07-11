@@ -91,3 +91,24 @@ export const aprobacionSchema = z.object({
 export const moderacionSchema = z.discriminatedUnion('accion', [aprobacionSchema, rechazoSchema]);
 
 export type ModeracionInput = z.infer<typeof moderacionSchema>;
+
+// ─────────────── Imágenes del anuncio ───────────────
+// Reglas compartidas front↔back para la galería (esquema §5.2). El API valida
+// el archivo real (mimetype/tamaño); el formulario solo usa esto de cortesía.
+export const IMAGENES_POR_VEHICULO_MAX = 12;
+export const IMAGEN_TAMANO_MAX_BYTES = 8 * 1024 * 1024; // 8 MB por archivo
+export const IMAGEN_MIMES_PERMITIDOS = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+] as const;
+
+// Reordenar/definir principal: se envía el orden deseado de ids. El primero
+// queda como principal.
+export const imagenesReordenarSchema = z.object({
+  orden: z.array(z.number().int().positive()).min(1).max(IMAGENES_POR_VEHICULO_MAX),
+});
+
+export type ImagenesReordenarInput = z.infer<typeof imagenesReordenarSchema>;

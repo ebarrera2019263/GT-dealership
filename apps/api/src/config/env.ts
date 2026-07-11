@@ -11,6 +11,12 @@ const envSchema = z.object({
   JWT_REFRESH_TTL_DIAS: z.coerce.number().int().positive().default(30),
   PORT: z.coerce.number().int().default(3001),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  // Almacenamiento de imágenes: disco local en el MVP (esquema §7 sugiere S3
+  // en producción; el service abstrae la escritura para migrar sin tocar la API).
+  UPLOAD_DIR: z.string().min(1).default('uploads'),
+  // Prefijo público para servir los archivos. Debe apuntar al mismo host que
+  // sirve /uploads (el API en dev; un CDN/bucket en prod).
+  PUBLIC_URL: z.string().url().default('http://localhost:3001'),
 });
 
 export type Env = z.infer<typeof envSchema>;

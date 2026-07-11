@@ -15,6 +15,9 @@ out/
 # Prisma
 apps/api/prisma/generated/
 
+# Imágenes subidas (contenido de usuario, no va al repo)
+apps/api/uploads/
+
 # Logs y sistema
 *.log
 .DS_Store
