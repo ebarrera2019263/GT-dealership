@@ -1,0 +1,23 @@
+{
+  "name": "concesionario",
+  "private": true,
+  "packageManager": "pnpm@11.11.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./apps/* dev",
+    "dev:api": "pnpm --filter @concesionario/api dev",
+    "dev:web": "pnpm --filter @concesionario/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "db:migrate": "pnpm --filter @concesionario/api db:migrate",
+    "db:seed": "pnpm --filter @concesionario/api db:seed",
+    "db:studio": "pnpm --filter @concesionario/api db:studio"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.0"
+  }
+}
