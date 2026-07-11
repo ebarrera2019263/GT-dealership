@@ -29,6 +29,9 @@ const ESTADO_UI: Record<string, { texto: string; clase: string }> = {
   vendido: { texto: 'Vendido', clase: 'bg-tinta text-papel' },
 };
 
+// Estados en los que el vendedor puede editar el contenido del anuncio.
+const EDITABLE = new Set(['borrador', 'rechazado', 'pausado']);
+
 // Acciones disponibles según el estado actual (endpoint = acción).
 const ACCIONES: Record<string, { accion: string; texto: string; primaria?: boolean }[]> = {
   borrador: [{ accion: 'publicar', texto: 'Enviar a revisión', primaria: true }],
@@ -158,6 +161,14 @@ export default function PanelPage() {
                     className="rounded-md border border-borde px-3 py-1.5 text-sm hover:border-quetzal hover:text-quetzal"
                   >
                     Ver
+                  </Link>
+                )}
+                {EDITABLE.has(v.estado) && (
+                  <Link
+                    href={`/panel/vehiculos/${v.id}/editar`}
+                    className="rounded-md border border-borde px-3 py-1.5 text-sm hover:border-quetzal hover:text-quetzal"
+                  >
+                    Editar
                   </Link>
                 )}
                 {acciones.map((a) => (

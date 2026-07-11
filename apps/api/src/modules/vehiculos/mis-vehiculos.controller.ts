@@ -23,6 +23,11 @@ export class MisVehiculosController {
     return this.vehiculosService.misVehiculos(usuario);
   }
 
+  @Get(':id')
+  obtener(@UsuarioActual() usuario: UsuarioAutenticado, @Param('id', ParseIntPipe) id: number) {
+    return this.vehiculosService.paraEdicion(usuario, id);
+  }
+
   @Post()
   crear(
     @UsuarioActual() usuario: UsuarioAutenticado,

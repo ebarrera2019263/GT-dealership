@@ -120,6 +120,52 @@ export class VehiculosService {
     });
   }
 
+  /** Datos completos de un anuncio propio para precargar el formulario de edición.
+   *  No expone VIN ni placa (esquema §8); esos no se editan desde el formulario. */
+  async paraEdicion(usuario: UsuarioAutenticado, id: number) {
+    const vehiculo = await this.prisma.vehiculo.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        slug: true,
+        estado: true,
+        usuarioId: true,
+        marcaId: true,
+        modeloId: true,
+        carroceriaId: true,
+        anio: true,
+        version: true,
+        precio: true,
+        moneda: true,
+        precioNegociable: true,
+        kilometraje: true,
+        transmisionId: true,
+        combustibleId: true,
+        cilindrada: true,
+        potencia: true,
+        puertas: true,
+        color: true,
+        traccion: true,
+        numDuenos: true,
+        descripcion: true,
+        departamentoId: true,
+        municipioId: true,
+        caracteristicas: { select: { caracteristicaId: true } },
+        imagenes: {
+          orderBy: { orden: 'asc' as const },
+          select: { id: true, url: true, urlThumb: true, esPrincipal: true },
+        },
+      },
+    });
+    if (!vehiculo) {
+      throw new NotFoundException('Anuncio no encontrado');
+    }
+    if (vehiculo.usuarioId !== usuario.id && usuario.rol !== 'admin') {
+      throw new ForbiddenException('Este anuncio no es tuyo');
+    }
+    return vehiculo;
+  }
+
   async misVehiculos(usuario: UsuarioAutenticado) {
     return this.prisma.vehiculo.findMany({
       where: { usuarioId: usuario.id },
