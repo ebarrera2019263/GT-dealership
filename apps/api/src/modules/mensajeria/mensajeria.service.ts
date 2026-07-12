@@ -40,23 +40,41 @@ export class MensajeriaService {
     }
 
     // Una conversación por (anuncio, comprador): unique en el schema.
-    const conversacion = await this.prisma.conversacion.upsert({
-      where: {
-        vehiculoId_compradorId: { vehiculoId: vehiculo.id, compradorId: usuario.id },
-      },
-      create: {
-        vehiculoId: vehiculo.id,
-        compradorId: usuario.id,
-        vendedorId: vehiculo.usuarioId,
-        ultimoMensajeEn: new Date(),
-        mensajes: { create: { emisorId: usuario.id, contenido: input.contenido } },
-      },
-      update: {
-        ultimoMensajeEn: new Date(),
-        mensajes: { create: { emisorId: usuario.id, contenido: input.contenido } },
-      },
+    const existente = await this.prisma.conversacion.findUnique({
+      where: { vehiculoId_compradorId: { vehiculoId: vehiculo.id, compradorId: usuario.id } },
       select: { id: true },
     });
+
+    if (existente) {
+      await this.prisma.$transaction([
+        this.prisma.mensaje.create({
+          data: { conversacionId: existente.id, emisorId: usuario.id, contenido: input.contenido },
+        }),
+        this.prisma.conversacion.update({
+          where: { id: existente.id },
+          data: { ultimoMensajeEn: new Date() },
+        }),
+      ]);
+      return { id: existente.id };
+    }
+
+    // Conversación nueva = un contacto más para la métrica del vendedor.
+    const [conversacion] = await this.prisma.$transaction([
+      this.prisma.conversacion.create({
+        data: {
+          vehiculoId: vehiculo.id,
+          compradorId: usuario.id,
+          vendedorId: vehiculo.usuarioId,
+          ultimoMensajeEn: new Date(),
+          mensajes: { create: { emisorId: usuario.id, contenido: input.contenido } },
+        },
+        select: { id: true },
+      }),
+      this.prisma.vehiculo.update({
+        where: { id: vehiculo.id },
+        data: { contactos: { increment: 1 } },
+      }),
+    ]);
     return { id: conversacion.id };
   }
 

@@ -239,8 +239,9 @@ export class VehiculosService {
 
   // ─────────────── Público: listado, ficha, similares ───────────────
 
-  async listar(filtros: VehiculosFiltros) {
-    const where: Prisma.VehiculoWhereInput = {
+  /** Where compartido por el listado público y el conteo de búsquedas guardadas. */
+  construirWhere(filtros: Partial<VehiculosFiltros>): Prisma.VehiculoWhereInput {
+    return {
       estado: 'publicado',
       marca: filtros.marca ? { slug: filtros.marca } : undefined,
       modelo: filtros.modelo ? { slug: filtros.modelo } : undefined,
@@ -252,6 +253,19 @@ export class VehiculosService {
       combustibleId: filtros.combustibleId,
       departamentoId: filtros.departamentoId,
     };
+  }
+
+  /** Cuenta anuncios que cumplen los criterios; opcionalmente publicados desde una fecha. */
+  contar(filtros: Partial<VehiculosFiltros>, publicadoDesde?: Date): Promise<number> {
+    const where = this.construirWhere(filtros);
+    if (publicadoDesde) {
+      where.publicadoEn = { gt: publicadoDesde };
+    }
+    return this.prisma.vehiculo.count({ where });
+  }
+
+  async listar(filtros: VehiculosFiltros) {
+    const where = this.construirWhere(filtros);
 
     const ordenes: Record<string, Prisma.VehiculoOrderByWithRelationInput[]> = {
       recientes: [{ destacado: 'desc' }, { publicadoEn: 'desc' }, { id: 'desc' }],

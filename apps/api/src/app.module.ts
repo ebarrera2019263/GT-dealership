@@ -5,6 +5,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
+import { BusquedasModule } from './modules/busquedas/busquedas.module';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
 import { FavoritosModule } from './modules/favoritos/favoritos.module';
 import { LeadsModule } from './modules/leads/leads.module';
@@ -30,6 +31,7 @@ import { PrismaModule } from './prisma/prisma.module';
     LeadsModule,
     MensajeriaModule,
     FavoritosModule,
+    BusquedasModule,
   ],
   providers: [
     // Orden: throttling → autenticación → autorización por rol.

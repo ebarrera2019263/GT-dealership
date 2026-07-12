@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Filtros } from '@/components/filtros';
+import { GuardarBusqueda } from '@/components/guardar-busqueda';
 import { VehiculoCard } from '@/components/vehiculo-card';
 import { listarVehiculos, obtenerCarrocerias, obtenerMarcas } from '@/lib/api';
 
@@ -63,6 +64,7 @@ export default async function ListadoPage({
             </summary>
             <div className="mt-3">
               <Filtros marcas={marcas} carrocerias={carrocerias} valores={valores} />
+              <GuardarBusqueda />
             </div>
           </details>
         </aside>

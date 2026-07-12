@@ -13,6 +13,8 @@ interface VehiculoPanel {
   anio: number;
   precio: string;
   moneda: 'GTQ' | 'USD';
+  vistas: number;
+  contactos: number;
   marca: { nombre: string };
   modelo: { nombre: string };
   imagenes: { urlThumb: string | null; url: string }[];
@@ -105,6 +107,28 @@ export default function PanelPage() {
 
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
+      {vehiculos && vehiculos.length > 0 && (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {(() => {
+            const publicados = vehiculos.filter((v) => v.estado === 'publicado').length;
+            const totalVistas = vehiculos.reduce((s, v) => s + v.vistas, 0);
+            const totalContactos = vehiculos.reduce((s, v) => s + v.contactos, 0);
+            const metricas: [string, number][] = [
+              ['Anuncios', vehiculos.length],
+              ['Publicados', publicados],
+              ['Vistas', totalVistas],
+              ['Contactos', totalContactos],
+            ];
+            return metricas.map(([label, valor]) => (
+              <div key={label} className="rounded-lg border border-borde bg-white p-3">
+                <p className="cifra text-2xl font-bold">{valor.toLocaleString('es-GT')}</p>
+                <p className="text-xs uppercase tracking-wide text-musgo">{label}</p>
+              </div>
+            ));
+          })()}
+        </div>
+      )}
+
       {vehiculos && vehiculos.length === 0 && (
         <div className="mt-10 rounded-lg border border-dashed border-borde p-10 text-center">
           <p className="text-musgo">Todavía no publicaste ningún vehículo.</p>
@@ -147,11 +171,16 @@ export default function PanelPage() {
                     {v.marca.nombre} {v.modelo.nombre} {v.anio}
                   </p>
                   <p className="cifra text-sm text-musgo">{formatearPrecio(v.precio, v.moneda)}</p>
-                  <span
-                    className={`mt-1 inline-block rounded px-1.5 py-0.5 text-xs font-medium ${ui.clase}`}
-                  >
-                    {ui.texto}
-                  </span>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${ui.clase}`}
+                    >
+                      {ui.texto}
+                    </span>
+                    <span className="cifra text-xs text-musgo">
+                      {v.vistas.toLocaleString('es-GT')} vistas · {v.contactos} contactos
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">

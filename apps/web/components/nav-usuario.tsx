@@ -69,6 +69,9 @@ export function NavUsuario() {
       <Link href="/favoritos" className="hover:text-quetzal">
         Favoritos
       </Link>
+      <Link href="/busquedas" className="hover:text-quetzal">
+        Búsquedas
+      </Link>
       <Link href="/mensajes" className="relative hover:text-quetzal">
         Mensajes
         {noLeidos > 0 && (
