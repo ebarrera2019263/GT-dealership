@@ -187,6 +187,7 @@ export default async function FichaPage({ params }: Props) {
 
           <div className="mt-4">
             <SimuladorFinanciamiento
+              vehiculoId={vehiculo.id}
               precio={vehiculo.precio}
               moneda={vehiculo.moneda}
               verificado={vehiculo.verificado}

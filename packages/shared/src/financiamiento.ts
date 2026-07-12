@@ -93,3 +93,33 @@ export const planFinanciamientoActualizarSchema = z
   });
 
 export type PlanFinanciamientoActualizarInput = z.infer<typeof planFinanciamientoActualizarSchema>;
+
+// ─────────────── Solicitudes de crédito (esquema §5.4, §6 módulo 6) ───────────────
+
+export const ESTADOS_SOLICITUD = ['enviada', 'en_revision', 'aprobada', 'rechazada'] as const;
+export type EstadoSolicitud = (typeof ESTADOS_SOLICITUD)[number];
+
+// El comprador manda su simulación; el server recalcula la cuota como fuente
+// de verdad (no confía en el número del cliente).
+export const solicitudCreditoCrearSchema = z.object({
+  vehiculoId: z.number().int().positive(),
+  planId: z.number().int().positive(),
+  enganche: z.number().min(0),
+  plazo: z.number().int().min(6).max(120),
+});
+
+export type SolicitudCreditoCrearInput = z.infer<typeof solicitudCreditoCrearSchema>;
+
+export const solicitudEstadoSchema = z.object({
+  estado: z.enum(ESTADOS_SOLICITUD),
+});
+
+export type SolicitudEstadoInput = z.infer<typeof solicitudEstadoSchema>;
+
+export const adminSolicitudesFiltrosSchema = z.object({
+  estado: z.enum(ESTADOS_SOLICITUD).optional(),
+  cursor: z.coerce.number().int().positive().optional(),
+  limite: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export type AdminSolicitudesFiltros = z.infer<typeof adminSolicitudesFiltrosSchema>;

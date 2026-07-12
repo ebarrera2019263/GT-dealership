@@ -1,7 +1,9 @@
 'use client';
 
 import { calcularCuotaNivelada } from '@concesionario/shared';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../lib/auth';
 import { formatearPrecio } from '../lib/formato';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
@@ -29,19 +31,23 @@ function opcionesPlazo(min: number, max: number): number[] {
 }
 
 export function SimuladorFinanciamiento({
+  vehiculoId,
   precio,
   moneda,
   verificado,
 }: {
+  vehiculoId: number;
   precio: string;
   moneda: 'GTQ' | 'USD';
   verificado: boolean;
 }) {
+  const { usuario, fetchAuth } = useAuth();
   const precioNum = Number(precio);
   const [planes, setPlanes] = useState<Plan[]>([]);
   const [planId, setPlanId] = useState<number | null>(null);
   const [enganche, setEnganche] = useState(0);
   const [plazo, setPlazo] = useState(0);
+  const [solicitud, setSolicitud] = useState<'idle' | 'enviando' | 'enviada' | 'error'>('idle');
 
   useEffect(() => {
     let vivo = true;
@@ -88,6 +94,17 @@ export function SimuladorFinanciamiento({
       tasaAnual: Number(plan.tasaAnual),
     });
   }, [plan, precioNum, engancheValido, plazo]);
+
+  async function solicitar() {
+    if (!plan) return;
+    setSolicitud('enviando');
+    const res = await fetchAuth('/solicitudes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vehiculoId, planId: plan.id, enganche: engancheValido, plazo }),
+    });
+    setSolicitud(res.ok ? 'enviada' : 'error');
+  }
 
   if (planes.length === 0) return null;
 
@@ -160,6 +177,35 @@ export function SimuladorFinanciamiento({
                 {formatearPrecio(engancheValido, moneda)}
               </p>
             </div>
+
+            {solicitud === 'enviada' ? (
+              <p className="text-center text-xs text-musgo">
+                Solicitud enviada.{' '}
+                <Link href="/solicitudes" className="font-medium text-quetzal hover:underline">
+                  Ver mis solicitudes
+                </Link>
+              </p>
+            ) : usuario ? (
+              <button
+                type="button"
+                onClick={solicitar}
+                disabled={solicitud === 'enviando'}
+                className="rounded-md border border-quetzal px-4 py-2 text-sm font-medium text-quetzal hover:bg-crema disabled:opacity-60"
+              >
+                {solicitud === 'enviando'
+                  ? 'Enviando…'
+                  : solicitud === 'error'
+                    ? 'No se pudo enviar — reintentar'
+                    : 'Solicitar este crédito'}
+              </button>
+            ) : (
+              <Link
+                href="/entrar?destino=/autos"
+                className="rounded-md border border-quetzal px-4 py-2 text-center text-sm font-medium text-quetzal hover:bg-crema"
+              >
+                Iniciá sesión para solicitar
+              </Link>
+            )}
           </>
         )}
       </div>

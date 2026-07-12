@@ -13,6 +13,7 @@ const NAV = [
   { href: '/admin/usuarios', etiqueta: 'Usuarios' },
   { href: '/admin/catalogo', etiqueta: 'Catálogo' },
   { href: '/admin/financiamiento', etiqueta: 'Financiamiento' },
+  { href: '/admin/solicitudes', etiqueta: 'Solicitudes' },
   { href: '/admin/reportes', etiqueta: 'Reportes' },
   { href: '/admin/leads', etiqueta: 'Leads' },
   { href: '/admin/auditoria', etiqueta: 'Auditoría' },
