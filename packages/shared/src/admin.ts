@@ -42,3 +42,45 @@ export const cambiarRolSchema = z.object({
 });
 
 export type CambiarRolInput = z.infer<typeof cambiarRolSchema>;
+
+// ─────────────── Catálogo maestro (esquema §6, módulo 5) ───────────────
+
+const slugOpcional = z
+  .string()
+  .trim()
+  .min(1)
+  .max(60)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug inválido: solo minúsculas, números y guiones')
+  .optional();
+
+export const marcaCrearSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+  slug: slugOpcional,
+  logoUrl: z.string().url().max(300).optional(),
+});
+
+export type MarcaCrearInput = z.infer<typeof marcaCrearSchema>;
+
+export const marcaActualizarSchema = z.object({
+  nombre: z.string().trim().min(1).max(60).optional(),
+  slug: slugOpcional,
+  logoUrl: z.string().url().max(300).nullable().optional(),
+  activo: z.boolean().optional(),
+});
+
+export type MarcaActualizarInput = z.infer<typeof marcaActualizarSchema>;
+
+export const modeloCrearSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+  slug: slugOpcional,
+});
+
+export type ModeloCrearInput = z.infer<typeof modeloCrearSchema>;
+
+export const modeloActualizarSchema = z.object({
+  nombre: z.string().trim().min(1).max(60).optional(),
+  slug: slugOpcional,
+  activo: z.boolean().optional(),
+});
+
+export type ModeloActualizarInput = z.infer<typeof modeloActualizarSchema>;
