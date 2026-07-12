@@ -25,7 +25,12 @@ import { PrismaModule } from './prisma/prisma.module';
 @Module({
   imports: [
     // Límite global laxo; los endpoints sensibles (login, registro) declaran el suyo.
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    // THROTTLE_DISABLED apaga el límite en entornos controlados (tests); en prod
+    // la variable no existe, así que el throttling queda activo.
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 100 }],
+      skipIf: () => process.env.THROTTLE_DISABLED === '1',
+    }),
     // Tareas programadas (cron de alertas de búsquedas guardadas).
     ScheduleModule.forRoot(),
     // Cola de notificaciones (emails de leads/mensajes/alertas) sobre Redis.

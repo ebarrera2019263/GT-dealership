@@ -36,3 +36,7 @@ graphify-out/cache/
 
 # Claude Code — settings personales (no compartir)
 .claude/settings.local.json
+
+# Artefactos de tests e2e (Playwright)
+test-results/
+playwright-report/
