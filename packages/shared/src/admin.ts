@@ -94,3 +94,15 @@ export const adminLeadsFiltrosSchema = z.object({
 });
 
 export type AdminLeadsFiltros = z.infer<typeof adminLeadsFiltrosSchema>;
+
+// ─────────────── Auditoría (esquema §3.7, §6 módulo 10) ───────────────
+
+export const adminAuditoriaFiltrosSchema = z.object({
+  entidad: z.string().trim().max(40).optional(),
+  accion: z.string().trim().max(60).optional(),
+  usuarioId: z.coerce.number().int().positive().optional(),
+  cursor: z.coerce.number().int().positive().optional(),
+  limite: z.coerce.number().int().min(1).max(50).default(30),
+});
+
+export type AdminAuditoriaFiltros = z.infer<typeof adminAuditoriaFiltrosSchema>;

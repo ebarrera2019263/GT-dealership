@@ -1,4 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { type AdminAuditoriaFiltros, adminAuditoriaFiltrosSchema } from '@concesionario/shared';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 
@@ -11,5 +13,12 @@ export class AdminController {
   @Get('metricas')
   metricas() {
     return this.admin.metricas();
+  }
+
+  @Get('auditoria')
+  auditoria(
+    @Query(new ZodValidationPipe(adminAuditoriaFiltrosSchema)) filtros: AdminAuditoriaFiltros,
+  ) {
+    return this.admin.auditoria(filtros);
   }
 }

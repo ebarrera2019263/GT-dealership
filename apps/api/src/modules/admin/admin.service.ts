@@ -1,4 +1,6 @@
+import type { AdminAuditoriaFiltros } from '@concesionario/shared';
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 // KPIs del dashboard admin (esquema §6, módulo 1). Un solo endpoint agrega los
@@ -77,5 +79,41 @@ export class AdminService {
       cursor.setMonth(cursor.getMonth() + 1);
     }
     return serie;
+  }
+
+  // ─────────────── Auditoría (esquema §3.7, §6 módulo 10) ───────────────
+
+  /** Registro de quién hizo qué, filtrable por entidad, acción o autor. */
+  async auditoria(filtros: AdminAuditoriaFiltros) {
+    const where: Prisma.AuditoriaWhereInput = {
+      entidad: filtros.entidad,
+      accion: filtros.accion,
+      usuarioId: filtros.usuarioId,
+    };
+
+    const registros = await this.prisma.auditoria.findMany({
+      where,
+      orderBy: { id: 'desc' },
+      take: filtros.limite + 1,
+      ...(filtros.cursor ? { cursor: { id: filtros.cursor }, skip: 1 } : {}),
+      select: {
+        id: true,
+        accion: true,
+        entidad: true,
+        entidadId: true,
+        datosAntes: true,
+        datosDespues: true,
+        ip: true,
+        creadoEn: true,
+        usuario: { select: { id: true, nombre: true, email: true } },
+      },
+    });
+
+    const hayMas = registros.length > filtros.limite;
+    const pagina = hayMas ? registros.slice(0, filtros.limite) : registros;
+    return {
+      resultados: pagina,
+      siguienteCursor: hayMas ? pagina[pagina.length - 1]?.id : null,
+    };
   }
 }
