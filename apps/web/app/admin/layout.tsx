@@ -8,6 +8,7 @@ import { useAuth } from '../../lib/auth';
 // Enlaces del panel admin. Se irán activando módulo por módulo (Fase 3).
 const NAV = [
   { href: '/admin', etiqueta: 'Dashboard' },
+  { href: '/admin/vehiculos', etiqueta: 'Vehículos' },
   { href: '/admin/moderacion', etiqueta: 'Moderación' },
 ];
 

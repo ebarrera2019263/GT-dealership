@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import type {
+  AdminVehiculosFiltros,
   VehiculoActualizarInput,
   VehiculoCrearInput,
   VehiculosFiltros,
@@ -230,6 +231,95 @@ export class VehiculosService {
           datosAntes: { estado: vehiculo.estado },
           datosDespues: { estado: transicion.hacia, motivo: opciones.motivo ?? null },
           ip: opciones.ip,
+        },
+        tx,
+      );
+      return actualizado;
+    });
+  }
+
+  // ─────────────── Admin: tabla, verificar, destacar (esquema §5.4) ───────────────
+
+  /** Tabla del admin: cualquier estado, filtrable por estado/marca/vendedor. */
+  async listarAdmin(filtros: AdminVehiculosFiltros) {
+    const where: Prisma.VehiculoWhereInput = {
+      estado: filtros.estado,
+      marca: filtros.marca ? { slug: filtros.marca } : undefined,
+      usuarioId: filtros.vendedorId,
+    };
+
+    const resultados = await this.prisma.vehiculo.findMany({
+      where,
+      orderBy: { id: 'desc' },
+      take: filtros.limite + 1,
+      ...(filtros.cursor ? { cursor: { id: filtros.cursor }, skip: 1 } : {}),
+      select: {
+        id: true,
+        slug: true,
+        anio: true,
+        version: true,
+        precio: true,
+        moneda: true,
+        estado: true,
+        verificado: true,
+        destacado: true,
+        vistas: true,
+        contactos: true,
+        publicadoEn: true,
+        marca: { select: { nombre: true } },
+        modelo: { select: { nombre: true } },
+        usuario: { select: { id: true, nombre: true, email: true } },
+      },
+    });
+
+    const hayMas = resultados.length > filtros.limite;
+    const pagina = hayMas ? resultados.slice(0, filtros.limite) : resultados;
+    return {
+      resultados: pagina,
+      siguienteCursor: hayMas ? pagina[pagina.length - 1]?.id : null,
+    };
+  }
+
+  cambiarVerificado(usuario: UsuarioAutenticado, id: number, valor: boolean, ip?: string) {
+    return this.cambiarBandera(usuario, id, 'verificado', valor, ip);
+  }
+
+  cambiarDestacado(usuario: UsuarioAutenticado, id: number, valor: boolean, ip?: string) {
+    return this.cambiarBandera(usuario, id, 'destacado', valor, ip);
+  }
+
+  /** Alterna una bandera booleana del anuncio y lo audita (esquema §3.7). */
+  private async cambiarBandera(
+    usuario: UsuarioAutenticado,
+    id: number,
+    campo: 'verificado' | 'destacado',
+    valor: boolean,
+    ip?: string,
+  ) {
+    const actual = await this.prisma.vehiculo.findUnique({
+      where: { id },
+      select: { verificado: true, destacado: true },
+    });
+    if (!actual) {
+      throw new NotFoundException('Anuncio no encontrado');
+    }
+
+    const data: Prisma.VehiculoUpdateInput = { [campo]: valor };
+    return this.prisma.$transaction(async (tx) => {
+      const actualizado = await tx.vehiculo.update({
+        where: { id },
+        data,
+        select: { id: true, verificado: true, destacado: true },
+      });
+      await this.auditoria.registrar(
+        {
+          usuarioId: usuario.id,
+          accion: `vehiculo.${campo}`,
+          entidad: 'vehiculo',
+          entidadId: id,
+          datosAntes: { [campo]: actual[campo] },
+          datosDespues: { [campo]: valor },
+          ip,
         },
         tx,
       );
