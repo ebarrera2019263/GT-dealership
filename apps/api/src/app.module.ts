@@ -11,6 +11,7 @@ import { FavoritosModule } from './modules/favoritos/favoritos.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { MensajeriaModule } from './modules/mensajeria/mensajeria.module';
 import { ModeracionModule } from './modules/moderacion/moderacion.module';
+import { ReportesModule } from './modules/reportes/reportes.module';
 import { SaludModule } from './modules/salud/salud.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { VehiculosModule } from './modules/vehiculos/vehiculos.module';
@@ -32,6 +33,7 @@ import { PrismaModule } from './prisma/prisma.module';
     MensajeriaModule,
     FavoritosModule,
     BusquedasModule,
+    ReportesModule,
   ],
   providers: [
     // Orden: throttling → autenticación → autorización por rol.

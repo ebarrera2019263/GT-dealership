@@ -4,5 +4,6 @@ export * from './busquedas';
 export * from './financiamiento';
 export * from './leads';
 export * from './mensajeria';
+export * from './reportes';
 export * from './roles';
 export * from './vehiculos';

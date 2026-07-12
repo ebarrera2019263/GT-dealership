@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BotonFavorito } from '@/components/boton-favorito';
+import { BotonReporte } from '@/components/boton-reporte';
 import { ContactarVendedor } from '@/components/contactar-vendedor';
 import { FormularioLead } from '@/components/formulario-lead';
 import { PlacaPrecio } from '@/components/placa-precio';
@@ -180,6 +181,7 @@ export default async function FichaPage({ params }: Props) {
               </p>
               <FormularioLead vehiculoId={vehiculo.id} />
             </div>
+            <BotonReporte vehiculoId={vehiculo.id} />
           </div>
         </aside>
       </div>

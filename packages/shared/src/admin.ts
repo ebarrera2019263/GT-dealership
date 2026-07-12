@@ -84,3 +84,13 @@ export const modeloActualizarSchema = z.object({
 });
 
 export type ModeloActualizarInput = z.infer<typeof modeloActualizarSchema>;
+
+// ─────────────── Leads del admin (esquema §6, módulo 8) ───────────────
+
+export const adminLeadsFiltrosSchema = z.object({
+  vehiculoId: z.coerce.number().int().positive().optional(),
+  cursor: z.coerce.number().int().positive().optional(),
+  limite: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export type AdminLeadsFiltros = z.infer<typeof adminLeadsFiltrosSchema>;
