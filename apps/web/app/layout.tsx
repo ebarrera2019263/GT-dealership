@@ -24,9 +24,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh bg-papel font-sans text-tinta antialiased">
         <AuthProvider>
           <FavoritosProvider>
-            <header className="border-b border-borde bg-papel">
+            <header className="sticky top-0 z-40 border-b border-borde/70 bg-papel/80 backdrop-blur-md">
               <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                <Link href="/" className="font-display text-2xl font-bold tracking-tight">
+                <Link
+                  href="/"
+                  className="font-display text-2xl font-extrabold tracking-tight text-tinta"
+                >
                   Autos<span className="text-quetzal">GT</span>
                 </Link>
                 <nav className="flex items-center gap-5 text-sm">

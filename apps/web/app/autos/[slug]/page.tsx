@@ -72,7 +72,7 @@ export default async function FichaPage({ params }: Props) {
     vehiculo.imagenes.find((i) => i.esPrincipal) ?? vehiculo.imagenes[0] ?? null;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6">
+    <main className="mx-auto max-w-6xl px-4 py-8">
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD requerido para SEO
@@ -85,33 +85,70 @@ export default async function FichaPage({ params }: Props) {
         </Link>
       </nav>
 
-      <div className="mt-4 flex flex-col gap-8 lg:flex-row">
-        <div className="min-w-0 flex-1">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-borde">
+      <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_21rem]">
+        <div className="min-w-0">
+          {/* Galería foto-protagonista: imagen grande + tira del resto */}
+          <div className="relative aspect-[3/2] overflow-hidden rounded-2xl bg-lienzo ring-1 ring-borde">
             {fotoPrincipal ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={fotoPrincipal.url}
-                alt={`${vehiculo.marca.nombre} ${vehiculo.modelo.nombre}`}
+                alt={`${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`}
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full items-center justify-center font-display text-2xl uppercase tracking-widest text-musgo">
+              <div className="flex h-full items-center justify-center font-display text-2xl font-semibold uppercase tracking-[0.2em] text-musgo/70">
                 Sin fotos todavía
               </div>
             )}
             {vehiculo.verificado && (
-              <span className="absolute left-3 top-3 rounded bg-quetzal px-2 py-0.5 text-xs font-semibold text-white">
+              <span className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-tinta/85 px-3 py-1 text-xs font-medium text-papel backdrop-blur-sm">
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.7 6.3a1 1 0 0 1 0 1.4l-6.5 6.5a1 1 0 0 1-1.4 0L4.3 9.7a1 1 0 1 1 1.4-1.4l3.1 3.1 5.8-5.8a1 1 0 0 1 1.4 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
                 Verificado
               </span>
             )}
           </div>
+          {(() => {
+            const otras = vehiculo.imagenes.filter((img) => img.id !== fotoPrincipal?.id);
+            return otras.length > 0 ? (
+              <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-5">
+                {otras.slice(0, 10).map((img) => (
+                  <div
+                    key={img.id}
+                    className="aspect-[4/3] overflow-hidden rounded-lg bg-lienzo ring-1 ring-borde"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img.urlThumb ?? img.url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null;
+          })()}
 
-          <h1 className="mt-4 font-display text-3xl font-bold leading-tight">
-            {vehiculo.marca.nombre} {vehiculo.modelo.nombre} {vehiculo.anio}
-            {vehiculo.version && <span className="text-musgo"> {vehiculo.version}</span>}
+          <h1 className="titular mt-8 text-[length:var(--text-titulo)] text-tinta">
+            {vehiculo.marca.nombre} {vehiculo.modelo.nombre}{' '}
+            <span className="cifra font-normal text-musgo">{vehiculo.anio}</span>
+            {vehiculo.version && (
+              <span className="font-normal text-musgo"> · {vehiculo.version}</span>
+            )}
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-4">
+          <div className="mt-3 flex flex-wrap items-center gap-4">
             <PlacaPrecio
               precio={vehiculo.precio}
               moneda={vehiculo.moneda}
@@ -121,39 +158,35 @@ export default async function FichaPage({ params }: Props) {
             <BotonFavorito vehiculoId={vehiculo.id} slug={slug} variante="boton" />
           </div>
 
-          <h2 className="mt-8 text-sm font-medium uppercase tracking-wide text-musgo">
-            Especificaciones
-          </h2>
-          <dl className="mt-2 grid grid-cols-2 gap-x-6 overflow-hidden rounded-lg border border-borde bg-white sm:grid-cols-3">
+          <h2 className="mt-10 font-display text-lg font-semibold text-tinta">Especificaciones</h2>
+          <dl className="mt-3 grid grid-cols-2 overflow-hidden rounded-2xl border border-borde bg-superficie sm:grid-cols-3">
             {especificaciones
               .filter(([, valor]) => valor !== null)
               .map(([nombre, valor]) => (
                 <div key={nombre} className="border-b border-borde px-4 py-3">
                   <dt className="text-xs text-musgo">{nombre}</dt>
-                  <dd className="cifra text-sm font-medium">{valor}</dd>
+                  <dd className="cifra mt-0.5 text-sm font-medium text-tinta">{valor}</dd>
                 </div>
               ))}
           </dl>
 
           {vehiculo.descripcion && (
             <>
-              <h2 className="mt-8 text-sm font-medium uppercase tracking-wide text-musgo">
-                Descripción
-              </h2>
-              <p className="mt-2 whitespace-pre-line leading-relaxed">{vehiculo.descripcion}</p>
+              <h2 className="mt-10 font-display text-lg font-semibold text-tinta">Descripción</h2>
+              <p className="prosa mt-3 whitespace-pre-line leading-relaxed text-tinta/90">
+                {vehiculo.descripcion}
+              </p>
             </>
           )}
 
           {vehiculo.caracteristicas.length > 0 && (
             <>
-              <h2 className="mt-8 text-sm font-medium uppercase tracking-wide text-musgo">
-                Equipamiento
-              </h2>
-              <ul className="mt-2 flex flex-wrap gap-2">
+              <h2 className="mt-10 font-display text-lg font-semibold text-tinta">Equipamiento</h2>
+              <ul className="mt-3 flex flex-wrap gap-2">
                 {vehiculo.caracteristicas.map(({ caracteristica }) => (
                   <li
                     key={caracteristica.id}
-                    className="rounded-full border border-borde bg-white px-3 py-1 text-sm"
+                    className="rounded-full border border-borde bg-superficie px-3 py-1.5 text-sm text-tinta"
                   >
                     {caracteristica.nombre}
                   </li>
@@ -163,12 +196,17 @@ export default async function FichaPage({ params }: Props) {
           )}
         </div>
 
-        <aside className="lg:w-80 lg:shrink-0">
-          <div className="rounded-lg border border-borde bg-white p-4 lg:sticky lg:top-4">
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-2xl border border-borde bg-superficie p-5 shadow-[var(--sombra-carta)]">
             <p className="text-sm text-musgo">Vendido por</p>
-            <p className="font-medium">{vehiculo.usuario.nombre}</p>
+            <p className="font-display text-lg font-semibold text-tinta">
+              {vehiculo.usuario.nombre}
+            </p>
             {vehiculo.usuario.telefonoVerificado && (
-              <p className="mt-0.5 text-xs text-quetzal">Teléfono verificado</p>
+              <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-quetzal">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-quetzal" /> Teléfono
+                verificado
+              </p>
             )}
             <div className="mt-4 border-t border-borde pt-4">
               <ContactarVendedor
@@ -199,9 +237,9 @@ export default async function FichaPage({ params }: Props) {
       </div>
 
       {similares.length > 0 && (
-        <section className="mt-12">
-          <h2 className="font-display text-2xl font-bold">Similares a este</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-16 border-t border-borde pt-10">
+          <h2 className="titular text-[length:var(--text-display)] text-tinta">Similares a este</h2>
+          <div className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {similares.map((v) => (
               <VehiculoCard key={v.id} vehiculo={v} />
             ))}

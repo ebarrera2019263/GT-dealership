@@ -1,21 +1,82 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paleta: papel frío + tinta verde-negra + verde quetzal como único acento.
-     El ámbar queda reservado para anuncios destacados. */
-  --color-papel: #f6f7f4;
-  --color-tinta: #182420;
-  --color-musgo: #4c5a52;
-  --color-borde: #dde2dc;
+  /* ── Paleta ──────────────────────────────────────────────────────────
+     Papel frío + tinta verde-negra + verde quetzal como único acento decisivo.
+     La foto del auto aporta el color; la UI se mantiene callada.
+     Ámbar queda reservado para anuncios destacados. */
+  --color-papel: #f4f6f2;      /* fondo de página, off-white frío */
+  --color-lienzo: #e9ece5;     /* sección/hero un tono más profundo, para ritmo */
+  --color-superficie: #ffffff; /* tarjetas y paneles */
+  --color-tinta: #141d19;      /* titulares y texto fuerte (near-black verdoso) */
+  --color-musgo: #46534b;      /* texto secundario — AA sobre papel y blanco */
+  --color-borde: #d7ddd4;      /* líneas y bordes sutiles */
   --color-quetzal: #0e7c4a;
   --color-quetzal-oscuro: #0a5f39;
+  --color-quetzal-vivo: #12925a;
   --color-ambar: #e8a13d;
 
   --font-sans: var(--font-archivo), system-ui, sans-serif;
   --font-display: var(--font-archivo-narrow), var(--font-archivo), sans-serif;
+
+  /* ── Escala tipográfica fluida (editorial: contraste alto entre pasos) ── */
+  --text-hero: clamp(2.75rem, 1.6rem + 5.6vw, 5.25rem);
+  --text-display: clamp(2rem, 1.3rem + 3vw, 3.25rem);
+  --text-titulo: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+
+  /* ── Motion ── */
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+  --sombra-carta: 0 1px 2px rgb(20 29 25 / 0.04), 0 12px 28px -12px rgb(20 29 25 / 0.16);
 }
 
-/* Los precios y cifras siempre con numerales tabulares: columnas que alinean */
+/* Cifras tabulares para precios y datos: columnas que alinean */
 .cifra {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Titulares display: tracking apretado y quiebre de línea equilibrado */
+.titular {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* Prosa larga: menos huérfanas */
+.prosa {
+  text-wrap: pretty;
+  max-width: 68ch;
+}
+
+/* Entrada suave escalonada para grillas de resultados (realza un default ya visible) */
+@keyframes emerger {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.emerge {
+  animation: emerger 0.5s var(--ease-salida) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .emerge {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
