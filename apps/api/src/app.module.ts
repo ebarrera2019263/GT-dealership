@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { BusquedasModule } from './modules/busquedas/busquedas.module';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
+import { CitasModule } from './modules/citas/citas.module';
 import { FavoritosModule } from './modules/favoritos/favoritos.module';
 import { FinanciamientoModule } from './modules/financiamiento/financiamiento.module';
 import { LeadsModule } from './modules/leads/leads.module';
@@ -46,6 +47,7 @@ import { PrismaModule } from './prisma/prisma.module';
     MensajeriaModule,
     FavoritosModule,
     BusquedasModule,
+    CitasModule,
     ReportesModule,
     FinanciamientoModule,
   ],

@@ -42,6 +42,22 @@ export class NotificacionesService {
     });
   }
 
+  nuevaCita(para: string, anuncio: string, fecha: string) {
+    return this.encolar({
+      para,
+      asunto: `Nueva solicitud de visita para tu ${anuncio}`,
+      cuerpo: `Un interesado quiere visitar tu ${anuncio} el ${fecha}.\nEntrá a tus visitas para confirmarla o cancelarla.`,
+    });
+  }
+
+  citaConfirmada(para: string, anuncio: string, fecha: string) {
+    return this.encolar({
+      para,
+      asunto: `Visita confirmada: ${anuncio}`,
+      cuerpo: `El vendedor confirmó tu visita para el ${anuncio} el ${fecha}. ¡Te esperan!`,
+    });
+  }
+
   alertaBusqueda(para: string, resumen: string, cantidad: number) {
     return this.encolar({
       para,

@@ -72,6 +72,9 @@ export function NavUsuario() {
       <Link href="/busquedas" className="hover:text-quetzal">
         Búsquedas
       </Link>
+      <Link href="/citas" className="hover:text-quetzal">
+        Visitas
+      </Link>
       <Link href="/mensajes" className="relative hover:text-quetzal">
         Mensajes
         {noLeidos > 0 && (

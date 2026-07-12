@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AgendarVisita } from '@/components/agendar-visita';
 import { BotonFavorito } from '@/components/boton-favorito';
 import { BotonReporte } from '@/components/boton-reporte';
 import { ContactarVendedor } from '@/components/contactar-vendedor';
@@ -182,6 +183,7 @@ export default async function FichaPage({ params }: Props) {
               </p>
               <FormularioLead vehiculoId={vehiculo.id} />
             </div>
+            <AgendarVisita vehiculoId={vehiculo.id} vendedorId={vehiculo.usuario.id} slug={slug} />
             <BotonReporte vehiculoId={vehiculo.id} />
           </div>
 
