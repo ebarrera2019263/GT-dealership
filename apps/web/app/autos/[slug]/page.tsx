@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ContactarVendedor } from '@/components/contactar-vendedor';
 import { FormularioLead } from '@/components/formulario-lead';
 import { PlacaPrecio } from '@/components/placa-precio';
 import { VehiculoCard } from '@/components/vehiculo-card';
@@ -165,6 +166,16 @@ export default async function FichaPage({ params }: Props) {
               <p className="mt-0.5 text-xs text-quetzal">Teléfono verificado</p>
             )}
             <div className="mt-4 border-t border-borde pt-4">
+              <ContactarVendedor
+                vehiculoId={vehiculo.id}
+                vendedorId={vehiculo.usuario.id}
+                slug={slug}
+              />
+            </div>
+            <div className="mt-4 border-t border-borde pt-4">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-musgo">
+                O dejá tus datos sin cuenta
+              </p>
               <FormularioLead vehiculoId={vehiculo.id} />
             </div>
           </div>

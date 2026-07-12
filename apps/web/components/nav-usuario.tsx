@@ -2,13 +2,31 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../lib/auth';
 
 const PUEDE_VENDER = new Set(['vendedor', 'concesionario', 'admin']);
 
 export function NavUsuario() {
-  const { usuario, cargando, logout } = useAuth();
+  const { usuario, cargando, logout, fetchAuth } = useAuth();
   const router = useRouter();
+  const [noLeidos, setNoLeidos] = useState(0);
+
+  const cargarNoLeidos = useCallback(async () => {
+    const res = await fetchAuth('/conversaciones/no-leidos');
+    if (res.ok) {
+      const { total } = await res.json();
+      setNoLeidos(total);
+    }
+  }, [fetchAuth]);
+
+  // Refresca el badge al montar y cada 30s mientras haya sesión.
+  useEffect(() => {
+    if (cargando || !usuario) return;
+    void cargarNoLeidos();
+    const t = setInterval(cargarNoLeidos, 30_000);
+    return () => clearInterval(t);
+  }, [cargando, usuario, cargarNoLeidos]);
 
   // Evita el parpadeo login→panel mientras se rehidrata la sesión
   if (cargando) {
@@ -48,6 +66,14 @@ export function NavUsuario() {
           Mis anuncios
         </Link>
       )}
+      <Link href="/mensajes" className="relative hover:text-quetzal">
+        Mensajes
+        {noLeidos > 0 && (
+          <span className="absolute -right-3 -top-2 rounded-full bg-quetzal px-1.5 text-xs font-semibold text-white">
+            {noLeidos}
+          </span>
+        )}
+      </Link>
       <button type="button" onClick={salir} className="text-musgo hover:text-quetzal">
         Salir
       </button>
