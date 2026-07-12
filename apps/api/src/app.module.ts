@@ -8,6 +8,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { BusquedasModule } from './modules/busquedas/busquedas.module';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
 import { FavoritosModule } from './modules/favoritos/favoritos.module';
+import { FinanciamientoModule } from './modules/financiamiento/financiamiento.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { MensajeriaModule } from './modules/mensajeria/mensajeria.module';
 import { ModeracionModule } from './modules/moderacion/moderacion.module';
@@ -34,6 +35,7 @@ import { PrismaModule } from './prisma/prisma.module';
     FavoritosModule,
     BusquedasModule,
     ReportesModule,
+    FinanciamientoModule,
   ],
   providers: [
     // Orden: throttling → autenticación → autorización por rol.
