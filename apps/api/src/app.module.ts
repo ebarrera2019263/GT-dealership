@@ -1,6 +1,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { env } from './config/env';
 import { AdminModule } from './modules/admin/admin.module';
@@ -24,6 +25,8 @@ import { PrismaModule } from './prisma/prisma.module';
   imports: [
     // Límite global laxo; los endpoints sensibles (login, registro) declaran el suyo.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    // Tareas programadas (cron de alertas de búsquedas guardadas).
+    ScheduleModule.forRoot(),
     // Cola de notificaciones (emails de leads/mensajes/alertas) sobre Redis.
     BullModule.forRoot({
       connection: (() => {
