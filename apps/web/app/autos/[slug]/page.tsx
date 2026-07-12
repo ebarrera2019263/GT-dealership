@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { BotonFavorito } from '@/components/boton-favorito';
 import { ContactarVendedor } from '@/components/contactar-vendedor';
 import { FormularioLead } from '@/components/formulario-lead';
 import { PlacaPrecio } from '@/components/placa-precio';
@@ -107,13 +108,14 @@ export default async function FichaPage({ params }: Props) {
             {vehiculo.marca.nombre} {vehiculo.modelo.nombre} {vehiculo.anio}
             {vehiculo.version && <span className="text-musgo"> {vehiculo.version}</span>}
           </h1>
-          <div className="mt-2">
+          <div className="mt-2 flex flex-wrap items-center gap-4">
             <PlacaPrecio
               precio={vehiculo.precio}
               moneda={vehiculo.moneda}
               negociable={vehiculo.precioNegociable}
               grande
             />
+            <BotonFavorito vehiculoId={vehiculo.id} slug={slug} variante="boton" />
           </div>
 
           <h2 className="mt-8 text-sm font-medium uppercase tracking-wide text-musgo">

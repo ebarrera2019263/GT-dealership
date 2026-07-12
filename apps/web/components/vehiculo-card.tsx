@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { VehiculoResumen } from '@/lib/api';
 import { formatearKm } from '@/lib/formato';
+import { BotonFavorito } from './boton-favorito';
 import { PlacaPrecio } from './placa-precio';
 
 export function VehiculoCard({ vehiculo }: { vehiculo: VehiculoResumen }) {
@@ -29,6 +30,9 @@ export function VehiculoCard({ vehiculo }: { vehiculo: VehiculoResumen }) {
             Destacado
           </span>
         )}
+        <div className="absolute right-2 top-2">
+          <BotonFavorito vehiculoId={vehiculo.id} slug={vehiculo.slug} />
+        </div>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-3">
         <h3 className="font-medium leading-snug">
