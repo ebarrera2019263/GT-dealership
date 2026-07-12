@@ -2,15 +2,26 @@ import type { AdminLeadsFiltros, LeadCrearInput } from '@concesionario/shared';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 
 @Injectable()
 export class LeadsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificaciones: NotificacionesService,
+  ) {}
 
   async crear(input: LeadCrearInput) {
     const vehiculo = await this.prisma.vehiculo.findUnique({
       where: { id: input.vehiculoId },
-      select: { id: true, estado: true },
+      select: {
+        id: true,
+        estado: true,
+        anio: true,
+        usuario: { select: { email: true } },
+        marca: { select: { nombre: true } },
+        modelo: { select: { nombre: true } },
+      },
     });
     if (!vehiculo || vehiculo.estado !== 'publicado') {
       throw new NotFoundException('Anuncio no encontrado');
@@ -23,7 +34,19 @@ export class LeadsService {
         data: { contactos: { increment: 1 } },
       }),
     ]);
-    // El email al vendedor sale por un worker de BullMQ (Fase 2); acá solo se persiste.
+
+    // Aviso al vendedor por la cola (envío real si hay SMTP; si no, queda en log).
+    // Best-effort: un fallo de la cola no debe tumbar la creación del lead.
+    const anuncio = `${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`;
+    try {
+      await this.notificaciones.nuevoLead(vehiculo.usuario.email, anuncio, {
+        nombre: input.nombre,
+        medio: input.telefono ?? input.email ?? 'sin dato',
+      });
+    } catch {
+      // el lead ya quedó persistido; la notificación es secundaria
+    }
+
     return { id: lead.id, creadoEn: lead.creadoEn };
   }
 

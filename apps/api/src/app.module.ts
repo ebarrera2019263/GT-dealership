@@ -1,6 +1,8 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { env } from './config/env';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
@@ -22,6 +24,13 @@ import { PrismaModule } from './prisma/prisma.module';
   imports: [
     // Límite global laxo; los endpoints sensibles (login, registro) declaran el suyo.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    // Cola de notificaciones (emails de leads/mensajes/alertas) sobre Redis.
+    BullModule.forRoot({
+      connection: (() => {
+        const url = new URL(env.REDIS_URL);
+        return { host: url.hostname, port: Number(url.port) || 6379 };
+      })(),
+    }),
     PrismaModule,
     AuthModule,
     UsuariosModule,

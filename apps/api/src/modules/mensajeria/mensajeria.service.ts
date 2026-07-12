@@ -3,10 +3,12 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { UsuarioAutenticado } from '../auth/auth.types';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 
 const RESUMEN_VEHICULO = {
   select: {
@@ -24,13 +26,26 @@ const PARTICIPANTE = { select: { id: true, nombre: true } } as const;
 
 @Injectable()
 export class MensajeriaService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly log = new Logger('Mensajeria');
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificaciones: NotificacionesService,
+  ) {}
 
   /** El comprador abre (o reusa) la conversación sobre un anuncio y deja el primer mensaje. */
   async iniciar(usuario: UsuarioAutenticado, input: IniciarConversacionInput) {
     const vehiculo = await this.prisma.vehiculo.findUnique({
       where: { id: input.vehiculoId },
-      select: { id: true, usuarioId: true, estado: true },
+      select: {
+        id: true,
+        usuarioId: true,
+        estado: true,
+        anio: true,
+        usuario: { select: { email: true } },
+        marca: { select: { nombre: true } },
+        modelo: { select: { nombre: true } },
+      },
     });
     if (!vehiculo || vehiculo.estado !== 'publicado') {
       throw new NotFoundException('Anuncio no encontrado');
@@ -38,6 +53,8 @@ export class MensajeriaService {
     if (vehiculo.usuarioId === usuario.id) {
       throw new BadRequestException('No podés escribirte a vos mismo sobre tu propio anuncio');
     }
+
+    const anuncio = `${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`;
 
     // Una conversación por (anuncio, comprador): unique en el schema.
     const existente = await this.prisma.conversacion.findUnique({
@@ -55,6 +72,9 @@ export class MensajeriaService {
           data: { ultimoMensajeEn: new Date() },
         }),
       ]);
+      await this.avisar(() =>
+        this.notificaciones.nuevoMensaje(vehiculo.usuario.email, anuncio, 'Un comprador'),
+      );
       return { id: existente.id };
     }
 
@@ -75,6 +95,9 @@ export class MensajeriaService {
         data: { contactos: { increment: 1 } },
       }),
     ]);
+    await this.avisar(() =>
+      this.notificaciones.nuevoMensaje(vehiculo.usuario.email, anuncio, 'Un comprador'),
+    );
     return { id: conversacion.id };
   }
 
@@ -158,7 +181,7 @@ export class MensajeriaService {
 
   /** Responde en una conversación existente. */
   async enviar(usuario: UsuarioAutenticado, id: number, input: EnviarMensajeInput) {
-    await this.obtenerParticipante(usuario, id);
+    const conv = await this.obtenerParticipante(usuario, id);
     const [mensaje] = await this.prisma.$transaction([
       this.prisma.mensaje.create({
         data: { conversacionId: id, emisorId: usuario.id, contenido: input.contenido },
@@ -169,7 +192,41 @@ export class MensajeriaService {
         data: { ultimoMensajeEn: new Date() },
       }),
     ]);
+
+    // Aviso al otro participante (el que no envió este mensaje).
+    const destinoId = conv.compradorId === usuario.id ? conv.vendedorId : conv.compradorId;
+    await this.avisar(async () => {
+      const ctx = await this.prisma.conversacion.findUnique({
+        where: { id },
+        select: {
+          vehiculo: {
+            select: {
+              anio: true,
+              marca: { select: { nombre: true } },
+              modelo: { select: { nombre: true } },
+            },
+          },
+        },
+      });
+      const destino = await this.prisma.usuario.findUnique({
+        where: { id: destinoId },
+        select: { email: true },
+      });
+      if (!ctx || !destino) return;
+      const anuncio = `${ctx.vehiculo.marca.nombre} ${ctx.vehiculo.modelo.nombre} ${ctx.vehiculo.anio}`;
+      await this.notificaciones.nuevoMensaje(destino.email, anuncio, 'La otra persona');
+    });
+
     return { ...mensaje, mio: true };
+  }
+
+  /** Encola una notificación sin romper el flujo si la cola falla (best-effort). */
+  private async avisar(fn: () => Promise<unknown>) {
+    try {
+      await fn();
+    } catch (e) {
+      this.log.warn(`No se pudo encolar la notificación: ${e instanceof Error ? e.message : e}`);
+    }
   }
 
   /** Cuenta de mensajes sin leer en todas mis conversaciones (para el badge del nav). */

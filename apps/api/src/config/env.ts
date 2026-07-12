@@ -17,6 +17,10 @@ const envSchema = z.object({
   // Prefijo público para servir los archivos. Debe apuntar al mismo host que
   // sirve /uploads (el API en dev; un CDN/bucket en prod).
   PUBLIC_URL: z.string().url().default('http://localhost:3001'),
+  // Envío de correos (leads, mensajes, alertas). Sin SMTP_URL, el worker de
+  // notificaciones solo registra en log — útil en dev y sin proveedor todavía.
+  SMTP_URL: z.string().url().optional(),
+  EMAIL_FROM: z.string().default('AutosGT <no-reply@autosgt.local>'),
 });
 
 export type Env = z.infer<typeof envSchema>;
