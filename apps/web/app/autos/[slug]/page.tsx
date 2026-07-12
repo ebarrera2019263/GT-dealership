@@ -6,6 +6,7 @@ import { BotonReporte } from '@/components/boton-reporte';
 import { ContactarVendedor } from '@/components/contactar-vendedor';
 import { FormularioLead } from '@/components/formulario-lead';
 import { PlacaPrecio } from '@/components/placa-precio';
+import { SimuladorFinanciamiento } from '@/components/simulador-financiamiento';
 import { VehiculoCard } from '@/components/vehiculo-card';
 import { obtenerFicha, obtenerSimilares } from '@/lib/api';
 import { formatearKm, traccionLegible } from '@/lib/formato';
@@ -182,6 +183,14 @@ export default async function FichaPage({ params }: Props) {
               <FormularioLead vehiculoId={vehiculo.id} />
             </div>
             <BotonReporte vehiculoId={vehiculo.id} />
+          </div>
+
+          <div className="mt-4">
+            <SimuladorFinanciamiento
+              precio={vehiculo.precio}
+              moneda={vehiculo.moneda}
+              verificado={vehiculo.verificado}
+            />
           </div>
         </aside>
       </div>

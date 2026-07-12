@@ -126,6 +126,26 @@ export class FinanciamientoAdminService {
     return plan;
   }
 
+  // ─────────────── Público: planes para el simulador ───────────────
+
+  /** Planes activos de entidades activas, ordenados por tasa (esquema §5, ficha). */
+  planesPublicos() {
+    return this.prisma.planFinanciamiento.findMany({
+      where: { activo: true, entidad: { activo: true } },
+      orderBy: [{ tasaAnual: 'asc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        nombre: true,
+        tasaAnual: true,
+        plazoMin: true,
+        plazoMax: true,
+        engancheMinPct: true,
+        aplicaA: true,
+        entidad: { select: { nombre: true, logoUrl: true } },
+      },
+    });
+  }
+
   // ─────────────── Helpers ───────────────
 
   private async buscarEntidad(id: number) {

@@ -18,6 +18,7 @@ async function main() {
   await seedCaracteristicas();
   await seedUbicaciones();
   await seedTipoCambio();
+  await seedFinanciamiento();
   console.log('Seed del catálogo maestro completado.');
 }
 
@@ -95,6 +96,65 @@ async function seedUbicaciones() {
     }
   }
   console.log(`  ubicaciones: ${Object.keys(DEPARTAMENTOS).length} departamentos`);
+}
+
+// Entidades financieras de ejemplo con un plan cada una, para que el simulador
+// de la ficha tenga datos reales sin tener que cargarlos a mano.
+const FINANCIERAS: {
+  nombre: string;
+  planes: {
+    nombre: string;
+    tasaAnual: number;
+    plazoMin: number;
+    plazoMax: number;
+    engancheMinPct: number;
+  }[];
+}[] = [
+  {
+    nombre: 'Banco Industrial',
+    planes: [
+      {
+        nombre: 'Crédito de vehículo',
+        tasaAnual: 13.5,
+        plazoMin: 12,
+        plazoMax: 60,
+        engancheMinPct: 20,
+      },
+    ],
+  },
+  {
+    nombre: 'G&T Continental',
+    planes: [
+      { nombre: 'Auto fácil', tasaAnual: 14.9, plazoMin: 12, plazoMax: 72, engancheMinPct: 15 },
+    ],
+  },
+  {
+    nombre: 'BAC Credomatic',
+    planes: [
+      { nombre: 'Plan clásico', tasaAnual: 12.75, plazoMin: 24, plazoMax: 60, engancheMinPct: 25 },
+    ],
+  },
+];
+
+async function seedFinanciamiento() {
+  for (const { nombre, planes } of FINANCIERAS) {
+    const entidad = await prisma.entidadFinanciera.upsert({
+      where: { nombre },
+      update: {},
+      create: { nombre },
+    });
+    for (const plan of planes) {
+      const existe = await prisma.planFinanciamiento.findFirst({
+        where: { entidadId: entidad.id, nombre: plan.nombre },
+      });
+      if (!existe) {
+        await prisma.planFinanciamiento.create({
+          data: { entidadId: entidad.id, ...plan },
+        });
+      }
+    }
+  }
+  console.log(`  financiamiento: ${FINANCIERAS.length} entidades con planes`);
 }
 
 async function seedTipoCambio() {
