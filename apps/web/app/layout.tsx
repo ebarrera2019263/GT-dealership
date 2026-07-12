@@ -40,6 +40,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <footer className="mt-16 border-t border-borde py-8 text-center text-sm text-musgo">
               <p>AutosGT conecta compradores y vendedores; la transacción es entre las partes.</p>
+              <p className="mt-2">
+                <Link href="/legal" className="hover:text-quetzal hover:underline">
+                  Aviso legal y términos de uso
+                </Link>
+              </p>
             </footer>
           </FavoritosProvider>
         </AuthProvider>
