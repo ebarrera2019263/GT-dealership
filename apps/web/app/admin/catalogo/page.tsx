@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { LookupCatalogo } from '../../../components/lookup-catalogo';
 import { useAuth } from '../../../lib/auth';
 
 interface Marca {
@@ -250,6 +251,12 @@ export default function AdminCatalogoPage() {
             </>
           )}
         </section>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <LookupCatalogo titulo="Carrocerías" endpoint="carrocerias" />
+        <LookupCatalogo titulo="Combustibles" endpoint="combustibles" />
+        <LookupCatalogo titulo="Características" endpoint="caracteristicas" conCategoria />
       </div>
     </div>
   );

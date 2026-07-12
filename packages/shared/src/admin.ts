@@ -85,6 +85,51 @@ export const modeloActualizarSchema = z.object({
 
 export type ModeloActualizarInput = z.infer<typeof modeloActualizarSchema>;
 
+// Carrocerías (tienen slug e ícono).
+export const carroceriaCrearSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+  slug: slugOpcional,
+  icono: z.string().trim().max(60).optional(),
+});
+
+export type CarroceriaCrearInput = z.infer<typeof carroceriaCrearSchema>;
+
+export const carroceriaActualizarSchema = z.object({
+  nombre: z.string().trim().min(1).max(60).optional(),
+  slug: slugOpcional,
+  icono: z.string().trim().max(60).nullable().optional(),
+});
+
+export type CarroceriaActualizarInput = z.infer<typeof carroceriaActualizarSchema>;
+
+// Combustibles (solo nombre).
+export const combustibleCrearSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+});
+
+export type CombustibleCrearInput = z.infer<typeof combustibleCrearSchema>;
+
+export const combustibleActualizarSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+});
+
+export type CombustibleActualizarInput = z.infer<typeof combustibleActualizarSchema>;
+
+// Características (nombre + categoría).
+export const caracteristicaCrearSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+  categoria: z.string().trim().min(1).max(40),
+});
+
+export type CaracteristicaCrearInput = z.infer<typeof caracteristicaCrearSchema>;
+
+export const caracteristicaActualizarSchema = z.object({
+  nombre: z.string().trim().min(1).max(60).optional(),
+  categoria: z.string().trim().min(1).max(40).optional(),
+});
+
+export type CaracteristicaActualizarInput = z.infer<typeof caracteristicaActualizarSchema>;
+
 // ─────────────── Leads del admin (esquema §6, módulo 8) ───────────────
 
 export const adminLeadsFiltrosSchema = z.object({

@@ -1,4 +1,10 @@
 import type {
+  CaracteristicaActualizarInput,
+  CaracteristicaCrearInput,
+  CarroceriaActualizarInput,
+  CarroceriaCrearInput,
+  CombustibleActualizarInput,
+  CombustibleCrearInput,
   MarcaActualizarInput,
   MarcaCrearInput,
   ModeloActualizarInput,
@@ -126,7 +132,223 @@ export class AdminCatalogoService {
     return modelo;
   }
 
+  // ─────────────── Carrocerías ───────────────
+
+  listarCarrocerias() {
+    return this.prisma.carroceria.findMany({
+      orderBy: { nombre: 'asc' },
+      select: {
+        id: true,
+        nombre: true,
+        slug: true,
+        icono: true,
+        _count: { select: { vehiculos: true } },
+      },
+    });
+  }
+
+  async crearCarroceria(actor: { id: number }, input: CarroceriaCrearInput, ip?: string) {
+    const slug = input.slug ?? slugify(input.nombre);
+    const carroceria = await this.conflicto(() =>
+      this.prisma.carroceria.create({
+        data: { nombre: input.nombre, slug, icono: input.icono },
+        select: { id: true, nombre: true, slug: true, icono: true },
+      }),
+    );
+    await this.auditar(
+      actor,
+      'carroceria.crear',
+      'carroceria',
+      carroceria.id,
+      undefined,
+      carroceria,
+      ip,
+    );
+    return carroceria;
+  }
+
+  async actualizarCarroceria(
+    actor: { id: number },
+    id: number,
+    input: CarroceriaActualizarInput,
+    ip?: string,
+  ) {
+    const antes = await this.buscar('carroceria', id);
+    const carroceria = await this.conflicto(() =>
+      this.prisma.carroceria.update({
+        where: { id },
+        data: { nombre: input.nombre, slug: input.slug, icono: input.icono },
+        select: { id: true, nombre: true, slug: true, icono: true },
+      }),
+    );
+    await this.auditar(actor, 'carroceria.actualizar', 'carroceria', id, antes, carroceria, ip);
+    return carroceria;
+  }
+
+  async eliminarCarroceria(actor: { id: number }, id: number, ip?: string) {
+    const antes = await this.buscar('carroceria', id);
+    await this.exigirSinUso(
+      this.prisma.vehiculo.count({ where: { carroceriaId: id } }),
+      'carrocería',
+    );
+    await this.prisma.carroceria.delete({ where: { id } });
+    await this.auditar(actor, 'carroceria.eliminar', 'carroceria', id, antes, {}, ip);
+    return { id };
+  }
+
+  // ─────────────── Combustibles ───────────────
+
+  listarCombustibles() {
+    return this.prisma.combustible.findMany({
+      orderBy: { nombre: 'asc' },
+      select: { id: true, nombre: true, _count: { select: { vehiculos: true } } },
+    });
+  }
+
+  async crearCombustible(actor: { id: number }, input: CombustibleCrearInput, ip?: string) {
+    const combustible = await this.conflicto(() =>
+      this.prisma.combustible.create({
+        data: { nombre: input.nombre },
+        select: { id: true, nombre: true },
+      }),
+    );
+    await this.auditar(
+      actor,
+      'combustible.crear',
+      'combustible',
+      combustible.id,
+      undefined,
+      combustible,
+      ip,
+    );
+    return combustible;
+  }
+
+  async actualizarCombustible(
+    actor: { id: number },
+    id: number,
+    input: CombustibleActualizarInput,
+    ip?: string,
+  ) {
+    const antes = await this.buscar('combustible', id);
+    const combustible = await this.conflicto(() =>
+      this.prisma.combustible.update({
+        where: { id },
+        data: { nombre: input.nombre },
+        select: { id: true, nombre: true },
+      }),
+    );
+    await this.auditar(actor, 'combustible.actualizar', 'combustible', id, antes, combustible, ip);
+    return combustible;
+  }
+
+  async eliminarCombustible(actor: { id: number }, id: number, ip?: string) {
+    const antes = await this.buscar('combustible', id);
+    await this.exigirSinUso(
+      this.prisma.vehiculo.count({ where: { combustibleId: id } }),
+      'combustible',
+    );
+    await this.prisma.combustible.delete({ where: { id } });
+    await this.auditar(actor, 'combustible.eliminar', 'combustible', id, antes, {}, ip);
+    return { id };
+  }
+
+  // ─────────────── Características ───────────────
+
+  listarCaracteristicas() {
+    return this.prisma.caracteristica.findMany({
+      orderBy: [{ categoria: 'asc' }, { nombre: 'asc' }],
+      select: {
+        id: true,
+        nombre: true,
+        categoria: true,
+        _count: { select: { vehiculos: true } },
+      },
+    });
+  }
+
+  async crearCaracteristica(actor: { id: number }, input: CaracteristicaCrearInput, ip?: string) {
+    const caracteristica = await this.conflicto(() =>
+      this.prisma.caracteristica.create({
+        data: { nombre: input.nombre, categoria: input.categoria },
+        select: { id: true, nombre: true, categoria: true },
+      }),
+    );
+    await this.auditar(
+      actor,
+      'caracteristica.crear',
+      'caracteristica',
+      caracteristica.id,
+      undefined,
+      caracteristica,
+      ip,
+    );
+    return caracteristica;
+  }
+
+  async actualizarCaracteristica(
+    actor: { id: number },
+    id: number,
+    input: CaracteristicaActualizarInput,
+    ip?: string,
+  ) {
+    const antes = await this.buscar('caracteristica', id);
+    const caracteristica = await this.conflicto(() =>
+      this.prisma.caracteristica.update({
+        where: { id },
+        data: { nombre: input.nombre, categoria: input.categoria },
+        select: { id: true, nombre: true, categoria: true },
+      }),
+    );
+    await this.auditar(
+      actor,
+      'caracteristica.actualizar',
+      'caracteristica',
+      id,
+      antes,
+      caracteristica,
+      ip,
+    );
+    return caracteristica;
+  }
+
+  async eliminarCaracteristica(actor: { id: number }, id: number, ip?: string) {
+    const antes = await this.buscar('caracteristica', id);
+    await this.exigirSinUso(
+      this.prisma.vehiculoCaracteristica.count({ where: { caracteristicaId: id } }),
+      'característica',
+    );
+    await this.prisma.caracteristica.delete({ where: { id } });
+    await this.auditar(actor, 'caracteristica.eliminar', 'caracteristica', id, antes, {}, ip);
+    return { id };
+  }
+
   // ─────────────── Helpers ───────────────
+
+  /** Bloquea el borrado si la entidad todavía está referenciada por anuncios. */
+  private async exigirSinUso(conteo: Promise<number>, etiqueta: string) {
+    const total = await conteo;
+    if (total > 0) {
+      throw new ConflictException(
+        `No se puede borrar: ${total} anuncio(s) usan esta ${etiqueta}. Reasignalos primero.`,
+      );
+    }
+  }
+
+  /** Busca una fila de catálogo por id o lanza 404; devuelve los datos para auditar el "antes". */
+  private async buscar(
+    entidad: 'carroceria' | 'combustible' | 'caracteristica',
+    id: number,
+  ): Promise<object> {
+    const fila =
+      entidad === 'carroceria'
+        ? await this.prisma.carroceria.findUnique({ where: { id } })
+        : entidad === 'combustible'
+          ? await this.prisma.combustible.findUnique({ where: { id } })
+          : await this.prisma.caracteristica.findUnique({ where: { id } });
+    if (!fila) throw new NotFoundException('Registro no encontrado');
+    return fila;
+  }
 
   private async buscarMarca(id: number) {
     const marca = await this.prisma.marca.findUnique({
