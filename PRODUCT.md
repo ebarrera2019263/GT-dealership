@@ -32,7 +32,7 @@ Confiable · claro · premium sin ser pretencioso. Como una **revista premium de
 1. **La foto es el diseño.** El auto manda; la UI se calla para que la fotografía y el precio brillen.
 2. **El precio se lee de un vistazo.** Cifras tabulares, jerarquía clara; nunca hay que buscar el número.
 3. **Confianza por craft, no por sellos.** Aire, alineación y detalle transmiten seriedad mejor que diez badges.
-4. **Un solo acento decisivo.** Verde quetzal se usa poco y con intención; el resto es papel + tinta y la foto.
+4. **Un solo acento decisivo.** Azul cobalto (`--color-acento`, `#1a56db`) se usa poco y con intención; el resto es papel + tinta y la foto. (Los tokens `--color-quetzal*` quedan como alias retro-compat apuntando al cobalto.)
 5. **Rápido y calmo.** Movimiento sutil e intencional, nunca decorativo; respeta `prefers-reduced-motion`.
 
 ## Accessibility & Inclusion

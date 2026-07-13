@@ -19,7 +19,7 @@ export function PlacaPrecio({
   return (
     <div className="inline-flex items-baseline gap-2">
       <span
-        className={`cifra inline-block rounded border-2 border-tinta bg-white px-2 py-0.5 font-display font-bold leading-none ${
+        className={`cifra inline-block rounded border-2 border-tinta bg-white px-2 py-0.5 font-sans font-bold leading-none ${
           grande ? 'text-3xl' : 'text-xl'
         }`}
       >

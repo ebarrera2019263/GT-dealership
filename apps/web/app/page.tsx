@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { VehiculoCard } from '@/components/vehiculo-card';
 import { listarVehiculos, obtenerMarcas } from '@/lib/api';
 
@@ -69,12 +70,9 @@ export default async function Home() {
               aria-label="Precio máximo en quetzales"
               className="min-w-0 flex-1 rounded-xl bg-transparent px-4 py-3 text-tinta placeholder:text-musgo focus:outline-none"
             />
-            <button
-              type="submit"
-              className="rounded-xl bg-quetzal px-7 py-3 font-semibold text-white transition-colors hover:bg-quetzal-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-quetzal"
-            >
+            <Button type="submit" className="h-auto rounded-xl px-7 py-3 text-base font-semibold">
               Buscar
-            </button>
+            </Button>
           </form>
         </div>
       </section>
@@ -119,7 +117,11 @@ export default async function Home() {
         ) : (
           <div className="mt-8 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {resultados.map((v, i) => (
-              <div key={v.id} className="emerge" style={{ animationDelay: `${i * 60}ms` }}>
+              <div
+                key={v.id}
+                className="emerge"
+                style={{ animationDelay: `${Math.min(i, 9) * 60}ms` }}
+              >
                 <VehiculoCard vehiculo={v} />
               </div>
             ))}

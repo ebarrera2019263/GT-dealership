@@ -1,8 +1,11 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   /* ── Paleta ──────────────────────────────────────────────────────────
-     Papel frío + tinta verde-negra + verde quetzal como único acento decisivo.
+     Papel frío + tinta casi-negra + azul cobalto como único acento decisivo.
      La foto del auto aporta el color; la UI se mantiene callada.
      Ámbar queda reservado para anuncios destacados. */
   --color-papel: #f4f6f2;      /* fondo de página, off-white frío */
@@ -11,13 +14,19 @@
   --color-tinta: #141d19;      /* titulares y texto fuerte (near-black verdoso) */
   --color-musgo: #46534b;      /* texto secundario — AA sobre papel y blanco */
   --color-borde: #d7ddd4;      /* líneas y bordes sutiles */
-  --color-quetzal: #0e7c4a;
-  --color-quetzal-oscuro: #0a5f39;
-  --color-quetzal-vivo: #12925a;
+
+  /* Acento decisivo: azul cobalto. AA sobre papel (≈5.7:1) y blanco sobre él (≈6.5:1). */
+  --color-acento: #1a56db;
+  --color-acento-oscuro: #1442ac;   /* hover / pressed */
+  --color-acento-vivo: #3b82f6;     /* sobre foto oscura (hero) */
+  /* Alias retro-compat: el código existente usa 'quetzal' → ahora resuelve a cobalto */
+  --color-quetzal: #1a56db;
+  --color-quetzal-oscuro: #1442ac;
+  --color-quetzal-vivo: #3b82f6;
   --color-ambar: #e8a13d;
 
-  --font-sans: var(--font-archivo), system-ui, sans-serif;
-  --font-display: var(--font-archivo-narrow), var(--font-archivo), sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
   /* ── Escala tipográfica fluida (editorial: contraste alto entre pasos) ── */
   --text-hero: clamp(2.75rem, 1.6rem + 5.6vw, 5.25rem);
@@ -35,12 +44,14 @@
   font-feature-settings: "tnum" 1;
 }
 
-/* Titulares display: tracking apretado y quiebre de línea equilibrado */
+/* Titulares display (Fraunces, serif): óptica automática, tracking suave para
+   serif de alto contraste y quiebre de línea equilibrado */
 .titular {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 0.98;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
   text-wrap: balance;
 }
 
@@ -65,6 +76,43 @@
   animation: emerger 0.5s var(--ease-salida) both;
 }
 
+/* "Pop" al guardar un favorito: escala y asienta, sin rebote */
+@keyframes corazon-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.pop-corazon {
+  animation: corazon-pop 0.42s var(--ease-salida);
+}
+
+/* Crossfade suave al cambiar de foto en la galería */
+@keyframes galeria-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.galeria-fade {
+  animation: galeria-fade 0.25s var(--ease-salida) both;
+}
+
+/* El <dialog> del lightbox aparece con un desvanecido, no de golpe */
+.galeria-dialog[open] {
+  animation: galeria-fade 0.2s var(--ease-salida) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -78,5 +126,95 @@
     animation: none;
     opacity: 1;
     transform: none;
+  }
+}
+
+@theme inline {
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Semánticos de shadcn → mapeados a NUESTRA paleta (papel/tinta/cobalto).
+     Así los componentes (Button, Input, Select, Dialog) heredan la marca. */
+  --background: var(--color-papel);
+  --foreground: var(--color-tinta);
+  --card: var(--color-superficie);
+  --card-foreground: var(--color-tinta);
+  --popover: var(--color-superficie);
+  --popover-foreground: var(--color-tinta);
+  --primary: var(--color-acento);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-lienzo);
+  --secondary-foreground: var(--color-tinta);
+  --muted: var(--color-lienzo);
+  --muted-foreground: var(--color-musgo);
+  --accent: var(--color-lienzo);
+  --accent-foreground: var(--color-tinta);
+  --destructive: #c0392b;
+  --border: var(--color-borde);
+  --input: var(--color-borde);
+  --ring: var(--color-acento);
+  --chart-1: var(--color-acento);
+  --chart-2: var(--color-acento-vivo);
+  --chart-3: var(--color-musgo);
+  --chart-4: var(--color-ambar);
+  --chart-5: var(--color-tinta);
+  --radius: 0.75rem;
+  --sidebar: var(--color-superficie);
+  --sidebar-foreground: var(--color-tinta);
+  --sidebar-primary: var(--color-acento);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--color-lienzo);
+  --sidebar-accent-foreground: var(--color-tinta);
+  --sidebar-border: var(--color-borde);
+  --sidebar-ring: var(--color-acento);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }

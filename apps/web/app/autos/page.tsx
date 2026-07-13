@@ -103,7 +103,11 @@ export default async function ListadoPage({
               </p>
               <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
                 {resultados.map((v, i) => (
-                  <div key={v.id} className="emerge" style={{ animationDelay: `${i * 45}ms` }}>
+                  <div
+                    key={v.id}
+                    className="emerge"
+                    style={{ animationDelay: `${Math.min(i, 9) * 45}ms` }}
+                  >
                     <VehiculoCard vehiculo={v} />
                   </div>
                 ))}

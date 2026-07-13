@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
-import { Archivo, Archivo_Narrow } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { NavUsuario } from '../components/nav-usuario';
 import { AuthProvider } from '../lib/auth';
 import { FavoritosProvider } from '../lib/favoritos';
 import './globals.css';
 
-const archivo = Archivo({ subsets: ['latin'], variable: '--font-archivo' });
-const archivoNarrow = Archivo_Narrow({ subsets: ['latin'], variable: '--font-archivo-narrow' });
+// Cuerpo/UI: Inter (grotesca limpia, cifras tabulares para precios).
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+// Display: Fraunces (serif de alto contraste con óptica variable — carácter de revista).
+const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', axes: ['opsz'] });
 
 export const metadata: Metadata = {
   title: {
@@ -20,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${archivo.variable} ${archivoNarrow.variable}`}>
+    <html lang="es" className={cn(inter.variable, fraunces.variable, 'font-sans')}>
       <body className="min-h-dvh bg-papel font-sans text-tinta antialiased">
         <AuthProvider>
           <FavoritosProvider>
