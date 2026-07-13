@@ -6,6 +6,7 @@ import { BotonFavorito } from '@/components/boton-favorito';
 import { BotonReporte } from '@/components/boton-reporte';
 import { ContactarVendedor } from '@/components/contactar-vendedor';
 import { FormularioLead } from '@/components/formulario-lead';
+import { GaleriaFicha } from '@/components/galeria-ficha';
 import { PlacaPrecio } from '@/components/placa-precio';
 import { SimuladorFinanciamiento } from '@/components/simulador-financiamiento';
 import { VehiculoCard } from '@/components/vehiculo-card';
@@ -68,8 +69,7 @@ export default async function FichaPage({ params }: Props) {
     ['Ubicación', `${vehiculo.municipio.nombre}, ${vehiculo.departamento.nombre}`],
   ];
 
-  const fotoPrincipal =
-    vehiculo.imagenes.find((i) => i.esPrincipal) ?? vehiculo.imagenes[0] ?? null;
+  const tituloVehiculo = `${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
@@ -87,59 +87,12 @@ export default async function FichaPage({ params }: Props) {
 
       <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_21rem]">
         <div className="min-w-0">
-          {/* Galería foto-protagonista: imagen grande + tira del resto */}
-          <div className="relative aspect-[3/2] overflow-hidden rounded-2xl bg-lienzo ring-1 ring-borde">
-            {fotoPrincipal ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={fotoPrincipal.url}
-                alt={`${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center font-display text-2xl font-semibold uppercase tracking-[0.2em] text-musgo/70">
-                Sin fotos todavía
-              </div>
-            )}
-            {vehiculo.verificado && (
-              <span className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-tinta/85 px-3 py-1 text-xs font-medium text-papel backdrop-blur-sm">
-                <svg
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.7 6.3a1 1 0 0 1 0 1.4l-6.5 6.5a1 1 0 0 1-1.4 0L4.3 9.7a1 1 0 1 1 1.4-1.4l3.1 3.1 5.8-5.8a1 1 0 0 1 1.4 0Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Verificado
-              </span>
-            )}
-          </div>
-          {(() => {
-            const otras = vehiculo.imagenes.filter((img) => img.id !== fotoPrincipal?.id);
-            return otras.length > 0 ? (
-              <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-5">
-                {otras.slice(0, 10).map((img) => (
-                  <div
-                    key={img.id}
-                    className="aspect-[4/3] overflow-hidden rounded-lg bg-lienzo ring-1 ring-borde"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img.urlThumb ?? img.url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : null;
-          })()}
+          {/* Galería foto-protagonista: imagen grande + miniaturas + lightbox */}
+          <GaleriaFicha
+            imagenes={vehiculo.imagenes}
+            titulo={tituloVehiculo}
+            verificado={vehiculo.verificado}
+          />
 
           <h1 className="titular mt-8 text-[length:var(--text-titulo)] text-tinta">
             {vehiculo.marca.nombre} {vehiculo.modelo.nombre}{' '}
