@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../lib/auth';
 
 interface VehiculoRef {
@@ -22,15 +23,9 @@ interface Cita {
 }
 
 const BADGE: Record<Cita['estado'], string> = {
-  pendiente: 'bg-crema text-musgo',
-  confirmada: 'bg-quetzal/10 text-quetzal',
+  pendiente: 'bg-lienzo text-musgo',
+  confirmada: 'bg-acento/10 text-acento',
   cancelada: 'bg-red-50 text-red-700',
-};
-
-const ETIQUETA: Record<Cita['estado'], string> = {
-  pendiente: 'Pendiente',
-  confirmada: 'Confirmada',
-  cancelada: 'Cancelada',
 };
 
 function fmtFecha(iso: string): string {
@@ -46,6 +41,7 @@ function anuncio(v: VehiculoRef): string {
 }
 
 export default function CitasPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const [mias, setMias] = useState<Cita[] | null>(null);
@@ -75,37 +71,44 @@ export default function CitasPage() {
   }
 
   if (cargando || mias === null) {
-    return <main className="mx-auto max-w-3xl px-4 py-10 text-musgo">Cargando…</main>;
+    return <main className="mx-auto max-w-3xl px-4 py-10 text-musgo">{t('common.loading')}</main>;
   }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold">Mis visitas</h1>
-      <p className="mt-1 text-sm text-musgo">Coordiná cuándo ver los vehículos que te interesan.</p>
+      <h1 className="font-display text-3xl font-bold">{t('citas.title')}</h1>
+      <p className="mt-1 text-sm text-musgo">{t('citas.subtitle')}</p>
 
       <section className="mt-8">
         <h2 className="text-xs font-medium uppercase tracking-wide text-musgo">
-          Visitas que solicité
+          {t('citas.requestedByMe')}
         </h2>
         {mias.length === 0 ? (
           <p className="mt-3 rounded-lg border border-borde bg-papel px-4 py-6 text-center text-sm text-musgo">
-            Todavía no solicitaste ninguna visita. Buscá un{' '}
-            <Link href="/autos" className="font-medium text-quetzal hover:underline">
-              vehículo
-            </Link>{' '}
-            y agendá una desde su ficha.
+            {(() => {
+              const [antes, despues] = t('citas.emptyMine').split('{link}');
+              return (
+                <>
+                  {antes}
+                  <Link href="/autos" className="font-medium text-acento hover:underline">
+                    {t('citas.vehicleLink')}
+                  </Link>
+                  {despues}
+                </>
+              );
+            })()}
           </p>
         ) : (
           <ul className="mt-3 flex flex-col gap-3">
             {mias.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-borde bg-white p-4"
+                className="flex items-center justify-between gap-3 rounded-lg border border-borde bg-superficie p-4"
               >
                 <div>
                   <Link
                     href={`/autos/${c.vehiculo.slug}`}
-                    className="font-medium hover:text-quetzal"
+                    className="font-medium hover:text-acento"
                   >
                     {anuncio(c.vehiculo)}
                   </Link>
@@ -115,7 +118,7 @@ export default function CitasPage() {
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE[c.estado]}`}
                   >
-                    {ETIQUETA[c.estado]}
+                    {t(`citas.estado.${c.estado}`)}
                   </span>
                   {c.estado !== 'cancelada' && (
                     <button
@@ -123,7 +126,7 @@ export default function CitasPage() {
                       onClick={() => accion(c.id, 'cancelar')}
                       className="text-sm text-musgo hover:text-red-700"
                     >
-                      Cancelar
+                      {t('citas.cancel')}
                     </button>
                   )}
                 </div>
@@ -136,18 +139,18 @@ export default function CitasPage() {
       {recibidas.length > 0 && (
         <section className="mt-10">
           <h2 className="text-xs font-medium uppercase tracking-wide text-musgo">
-            Visitas a mis anuncios
+            {t('citas.toMyListings')}
           </h2>
           <ul className="mt-3 flex flex-col gap-3">
             {recibidas.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-borde bg-white p-4"
+                className="flex items-center justify-between gap-3 rounded-lg border border-borde bg-superficie p-4"
               >
                 <div>
                   <Link
                     href={`/autos/${c.vehiculo.slug}`}
-                    className="font-medium hover:text-quetzal"
+                    className="font-medium hover:text-acento"
                   >
                     {anuncio(c.vehiculo)}
                   </Link>
@@ -160,15 +163,15 @@ export default function CitasPage() {
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE[c.estado]}`}
                   >
-                    {ETIQUETA[c.estado]}
+                    {t(`citas.estado.${c.estado}`)}
                   </span>
                   {c.estado === 'pendiente' && (
                     <button
                       type="button"
                       onClick={() => accion(c.id, 'confirmar')}
-                      className="rounded-md bg-quetzal px-3 py-1 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+                      className="rounded-md bg-acento px-3 py-1 text-sm font-medium text-white hover:bg-acento-oscuro"
                     >
-                      Confirmar
+                      {t('citas.confirm')}
                     </button>
                   )}
                   {c.estado !== 'cancelada' && (
@@ -177,7 +180,7 @@ export default function CitasPage() {
                       onClick={() => accion(c.id, 'cancelar')}
                       className="text-sm text-musgo hover:text-red-700"
                     >
-                      Cancelar
+                      {t('citas.cancel')}
                     </button>
                   )}
                 </div>

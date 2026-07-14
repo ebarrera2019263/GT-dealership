@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../lib/auth';
 
 interface ConversacionResumen {
@@ -26,6 +27,7 @@ function cuando(iso: string | null): string {
 }
 
 export default function MensajesPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const [convs, setConvs] = useState<ConversacionResumen[] | null>(null);
@@ -45,20 +47,22 @@ export default function MensajesPage() {
   }, [cargando, usuario, router, cargar]);
 
   if (cargando || !usuario) {
-    return <main className="mx-auto max-w-3xl px-4 py-12 text-sm text-musgo">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-12 text-sm text-musgo">{t('common.loading')}</main>
+    );
   }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Mensajes</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">{t('mensajes.title')}</h1>
 
       {convs && convs.length === 0 && (
         <div className="mt-10 rounded-lg border border-dashed border-borde p-10 text-center text-musgo">
-          Todavía no tenés conversaciones. Escribí a un vendedor desde la ficha de un vehículo.
+          {t('mensajes.empty')}
         </div>
       )}
 
-      <ul className="mt-6 flex flex-col divide-y divide-borde rounded-lg border border-borde bg-white">
+      <ul className="mt-6 flex flex-col divide-y divide-borde rounded-lg border border-borde bg-superficie">
         {convs?.map((c) => {
           const thumb = c.vehiculo?.imagenes[0]?.urlThumb ?? c.vehiculo?.imagenes[0]?.url;
           return (
@@ -80,7 +84,7 @@ export default function MensajesPage() {
                     <p className="truncate font-medium">
                       {c.vehiculo
                         ? `${c.vehiculo.marca.nombre} ${c.vehiculo.modelo.nombre} ${c.vehiculo.anio}`
-                        : 'Anuncio no disponible'}
+                        : t('mensajes.listingUnavailable')}
                     </p>
                     <span className="shrink-0 text-xs text-musgo">
                       {cuando(c.ultimoMensaje?.creadoEn ?? null)}
@@ -88,14 +92,14 @@ export default function MensajesPage() {
                   </div>
                   <p className="truncate text-sm text-musgo">
                     <span className="text-xs uppercase tracking-wide">
-                      {c.rolPropio === 'comprador' ? 'Vendedor' : 'Comprador'}:{' '}
+                      {c.rolPropio === 'comprador' ? t('mensajes.seller') : t('mensajes.buyer')}:{' '}
                       {c.contraparte.nombre}
                     </span>
                     {c.ultimoMensaje && <> · {c.ultimoMensaje.contenido}</>}
                   </p>
                 </div>
                 {c.noLeidos > 0 && (
-                  <span className="ml-1 shrink-0 rounded-full bg-quetzal px-2 py-0.5 text-xs font-semibold text-white">
+                  <span className="ml-1 shrink-0 rounded-full bg-acento px-2 py-0.5 text-xs font-semibold text-white">
                     {c.noLeidos}
                   </span>
                 )}

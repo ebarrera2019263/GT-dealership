@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../lib/auth';
 
 const MAX = 12;
@@ -21,6 +22,7 @@ export function UploaderFotos({
   inicial?: Imagen[];
   onCambio?: (imagenes: Imagen[]) => void;
 }) {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [imagenes, setImagenes] = useState<Imagen[]>(inicial);
   const [subiendo, setSubiendo] = useState(false);
@@ -35,7 +37,7 @@ export function UploaderFotos({
   async function subir(archivos: FileList) {
     if (archivos.length === 0) return;
     if (imagenes.length + archivos.length > MAX) {
-      setError(`Máximo ${MAX} fotos por anuncio.`);
+      setError(t('uploader.maxError', { max: MAX }));
       return;
     }
     setSubiendo(true);
@@ -50,7 +52,7 @@ export function UploaderFotos({
     });
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
-      setError(cuerpo?.message ?? 'No se pudieron subir las fotos');
+      setError(cuerpo?.message ?? t('uploader.uploadError'));
     } else {
       actualizar(await res.json());
     }
@@ -64,7 +66,7 @@ export function UploaderFotos({
       method: 'DELETE',
     });
     if (!res.ok) {
-      setError('No se pudo eliminar la foto');
+      setError(t('uploader.deleteError'));
       return;
     }
     actualizar(await res.json());
@@ -91,12 +93,12 @@ export function UploaderFotos({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={img.urlThumb ?? img.url}
-              alt="Foto del vehículo"
+              alt={t('uploader.photoAlt')}
               className="h-full w-full object-cover"
             />
             {img.esPrincipal && (
-              <span className="absolute left-1 top-1 rounded bg-quetzal px-1.5 py-0.5 text-xs font-medium text-white">
-                Principal
+              <span className="absolute left-1 top-1 rounded bg-acento px-1.5 py-0.5 text-xs font-medium text-white">
+                {t('uploader.principal')}
               </span>
             )}
             <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-tinta/70 p-1 opacity-0 transition-opacity group-hover:opacity-100">
@@ -104,9 +106,9 @@ export function UploaderFotos({
                 <button
                   type="button"
                   onClick={() => hacerPrincipal(img.id)}
-                  className="text-xs font-medium text-papel hover:text-quetzal"
+                  className="text-xs font-medium text-papel hover:text-acento"
                 >
-                  Principal
+                  {t('uploader.principal')}
                 </button>
               )}
               <button
@@ -114,7 +116,7 @@ export function UploaderFotos({
                 onClick={() => eliminar(img.id)}
                 className="ml-auto text-xs font-medium text-papel hover:text-red-300"
               >
-                Quitar
+                {t('uploader.remove')}
               </button>
             </div>
           </div>
@@ -125,9 +127,9 @@ export function UploaderFotos({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={subiendo}
-            className="flex aspect-[4/3] flex-col items-center justify-center rounded-md border border-dashed border-borde text-sm text-musgo hover:border-quetzal hover:text-quetzal disabled:opacity-60"
+            className="flex aspect-[4/3] flex-col items-center justify-center rounded-md border border-dashed border-borde text-sm text-musgo hover:border-acento hover:text-acento disabled:opacity-60"
           >
-            {subiendo ? 'Subiendo…' : '+ Agregar'}
+            {subiendo ? t('uploader.uploading') : t('uploader.add')}
           </button>
         )}
       </div>
@@ -141,10 +143,7 @@ export function UploaderFotos({
         onChange={(e) => e.target.files && subir(e.target.files)}
       />
       {error && <p className="text-sm text-red-700">{error}</p>}
-      <p className="text-xs text-musgo">
-        Hasta {MAX} fotos. La primera es la principal (podés cambiarla). Se optimizan
-        automáticamente.
-      </p>
+      <p className="text-xs text-musgo">{t('uploader.hint', { max: MAX })}</p>
     </div>
   );
 }

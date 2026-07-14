@@ -3,6 +3,7 @@
 import { calcularCuotaNivelada } from '@concesionario/shared';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../lib/auth';
 import { formatearPrecio } from '../lib/formato';
 
@@ -41,6 +42,7 @@ export function SimuladorFinanciamiento({
   moneda: 'GTQ' | 'USD';
   verificado: boolean;
 }) {
+  const t = useT();
   const { usuario, fetchAuth } = useAuth();
   const precioNum = Number(precio);
   const [planes, setPlanes] = useState<Plan[]>([]);
@@ -109,16 +111,14 @@ export function SimuladorFinanciamiento({
   if (planes.length === 0) return null;
 
   return (
-    <section className="rounded-lg border border-borde bg-white p-4">
-      <h2 className="font-display text-lg font-bold">Simulá tu financiamiento</h2>
-      <p className="mt-0.5 text-xs text-musgo">
-        Estimación de cuota nivelada. No es una oferta; sujeta a aprobación de la entidad.
-      </p>
+    <section className="rounded-lg border border-borde bg-superficie p-4">
+      <h2 className="font-display text-lg font-bold">{t('simulador.title')}</h2>
+      <p className="mt-0.5 text-xs text-musgo">{t('simulador.disclaimer')}</p>
 
       <div className="mt-3 flex flex-col gap-3">
         <label className="flex flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-musgo">
-            Entidad y plan
+            {t('simulador.entityPlan')}
           </span>
           <select
             value={planId ?? ''}
@@ -137,7 +137,10 @@ export function SimuladorFinanciamiento({
           <>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-musgo">
-                Enganche (mín. {plan.engancheMinPct}% · {formatearPrecio(engancheMin, moneda)})
+                {t('simulador.downPayment', {
+                  pct: plan.engancheMinPct,
+                  monto: formatearPrecio(engancheMin, moneda),
+                })}
               </span>
               <input
                 type="number"
@@ -152,7 +155,7 @@ export function SimuladorFinanciamiento({
 
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium uppercase tracking-wide text-musgo">
-                Plazo: {plazo} meses
+                {t('simulador.term', { n: plazo })}
               </span>
               <select
                 value={plazo}
@@ -161,28 +164,33 @@ export function SimuladorFinanciamiento({
               >
                 {opcionesPlazo(plan.plazoMin, plan.plazoMax).map((p) => (
                   <option key={p} value={p}>
-                    {p} meses
+                    {t('simulador.months', { n: p })}
                   </option>
                 ))}
               </select>
             </label>
 
-            <div className="rounded-md bg-crema p-3 text-center">
-              <p className="text-xs uppercase tracking-wide text-musgo">Cuota mensual estimada</p>
-              <p className="cifra text-3xl font-bold text-quetzal">
+            <div className="rounded-md bg-lienzo p-3 text-center">
+              <p className="text-xs uppercase tracking-wide text-musgo">
+                {t('simulador.monthlyEstimate')}
+              </p>
+              <p className="cifra text-3xl font-bold text-acento">
                 {cuota !== null ? formatearPrecio(cuota, moneda) : '—'}
               </p>
               <p className="cifra mt-1 text-xs text-musgo">
-                {plazo} cuotas · tasa {plan.tasaAnual}% anual · enganche{' '}
-                {formatearPrecio(engancheValido, moneda)}
+                {t('simulador.summary', {
+                  n: plazo,
+                  tasa: plan.tasaAnual,
+                  enganche: formatearPrecio(engancheValido, moneda),
+                })}
               </p>
             </div>
 
             {solicitud === 'enviada' ? (
               <p className="text-center text-xs text-musgo">
-                Solicitud enviada.{' '}
-                <Link href="/solicitudes" className="font-medium text-quetzal hover:underline">
-                  Ver mis solicitudes
+                {t('simulador.requestSent')}{' '}
+                <Link href="/solicitudes" className="font-medium text-acento hover:underline">
+                  {t('simulador.viewMyRequests')}
                 </Link>
               </p>
             ) : usuario ? (
@@ -190,20 +198,20 @@ export function SimuladorFinanciamiento({
                 type="button"
                 onClick={solicitar}
                 disabled={solicitud === 'enviando'}
-                className="rounded-md border border-quetzal px-4 py-2 text-sm font-medium text-quetzal hover:bg-crema disabled:opacity-60"
+                className="rounded-md border border-acento px-4 py-2 text-sm font-medium text-acento hover:bg-lienzo disabled:opacity-60"
               >
                 {solicitud === 'enviando'
-                  ? 'Enviando…'
+                  ? t('simulador.sending')
                   : solicitud === 'error'
-                    ? 'No se pudo enviar — reintentar'
-                    : 'Solicitar este crédito'}
+                    ? t('simulador.sendError')
+                    : t('simulador.request')}
               </button>
             ) : (
               <Link
                 href="/entrar?destino=/autos"
-                className="rounded-md border border-quetzal px-4 py-2 text-center text-sm font-medium text-quetzal hover:bg-crema"
+                className="rounded-md border border-acento px-4 py-2 text-center text-sm font-medium text-acento hover:bg-lienzo"
               >
-                Iniciá sesión para solicitar
+                {t('simulador.loginToRequest')}
               </Link>
             )}
           </>
@@ -214,4 +222,4 @@ export function SimuladorFinanciamiento({
 }
 
 const estiloControl =
-  'w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none';
+  'w-full rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none';

@@ -55,3 +55,23 @@ de diseñar cualquier módulo nuevo.
 - Tras cambiar `packages/shared`: `pnpm --filter @concesionario/shared build`.
 - Lint: `pnpm lint` (Biome; en `apps/api` la regla `useImportType` está apagada a
   propósito — convertir imports de servicios a `import type` rompe la DI de NestJS).
+
+### Levantar / bajar todo
+
+La BD y Redis van en Docker; API y web corren nativas con `pnpm`. El orden importa:
+Docker primero (la API necesita la BD viva al arrancar), luego las apps.
+
+```bash
+# Levantar todo de un solo (infra + ambas apps en paralelo)
+docker compose up -d && pnpm dev
+
+# Bajar todo (sin borrar datos)
+docker compose stop && pkill -f "pnpm.*dev"; pkill -f "next dev"; pkill -f "nest start"
+
+# Reinicio total borrando la BD (⚠️ -v elimina los volúmenes)
+docker compose down -v && docker compose up -d && pnpm db:migrate && pnpm db:seed && pnpm dev
+```
+
+- `pnpm dev:api` / `pnpm dev:web` para levantar una sola app.
+- El script raíz `dev` usa `--filter "./apps/*"` **con comillas**: sin ellas, zsh
+  expande el glob antes de pnpm y falla con `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`.

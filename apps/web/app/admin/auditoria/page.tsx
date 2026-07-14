@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../../lib/auth';
 
 interface Registro {
@@ -35,6 +36,7 @@ function resumen(dato: unknown): string {
 }
 
 export default function AdminAuditoriaPage() {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [filas, setFilas] = useState<Registro[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
@@ -52,7 +54,7 @@ export default function AdminAuditoriaPage() {
       if (desde) params.set('cursor', String(desde));
       const res = await fetchAuth(`/admin/auditoria?${params.toString()}`);
       if (!res.ok) {
-        setError('No se pudo cargar la auditoría');
+        setError(t('admin.auditoria.loadError'));
         setCargando(false);
         return;
       }
@@ -62,7 +64,7 @@ export default function AdminAuditoriaPage() {
       setError('');
       setCargando(false);
     },
-    [entidad, accion, fetchAuth],
+    [entidad, accion, fetchAuth, t],
   );
 
   // Recarga al montar y al cambiar la entidad; la acción se aplica al enviar.
@@ -73,8 +75,10 @@ export default function AdminAuditoriaPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Auditoría</h1>
-      <p className="mt-1 text-sm text-musgo">Quién hizo qué, cuándo y desde dónde.</p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">
+        {t('admin.auditoria.title')}
+      </h1>
+      <p className="mt-1 text-sm text-musgo">{t('admin.auditoria.subtitle')}</p>
 
       <form
         className="mt-4 flex flex-wrap items-center gap-2"
@@ -86,10 +90,10 @@ export default function AdminAuditoriaPage() {
         <select
           value={entidad}
           onChange={(e) => setEntidad(e.target.value)}
-          aria-label="Filtrar por entidad"
-          className="rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+          aria-label={t('admin.auditoria.filterEntityAria')}
+          className="rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
         >
-          <option value="">Todas las entidades</option>
+          <option value="">{t('admin.auditoria.allEntities')}</option>
           {ENTIDADES.map((x) => (
             <option key={x} value={x}>
               {x}
@@ -99,14 +103,14 @@ export default function AdminAuditoriaPage() {
         <input
           value={accion}
           onChange={(e) => setAccion(e.target.value)}
-          placeholder="Acción (ej. usuario.rol)"
-          className="min-w-56 flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+          placeholder={t('admin.auditoria.actionPlaceholder')}
+          className="min-w-56 flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
         />
         <button
           type="submit"
-          className="rounded-md bg-quetzal px-4 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+          className="rounded-md bg-acento px-4 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
         >
-          Filtrar
+          {t('admin.auditoria.filter')}
         </button>
       </form>
 
@@ -116,11 +120,11 @@ export default function AdminAuditoriaPage() {
         <table className="w-full min-w-[820px] text-sm">
           <thead className="border-b border-borde text-left text-xs uppercase tracking-wide text-musgo">
             <tr>
-              <th className="px-3 py-2 font-semibold">Cuándo</th>
-              <th className="px-3 py-2 font-semibold">Autor</th>
-              <th className="px-3 py-2 font-semibold">Acción</th>
-              <th className="px-3 py-2 font-semibold">Entidad</th>
-              <th className="px-3 py-2 font-semibold">Cambio</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.auditoria.colWhen')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.auditoria.colAuthor')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.auditoria.colAction')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.auditoria.colEntity')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.auditoria.colChange')}</th>
             </tr>
           </thead>
           <tbody>
@@ -134,7 +138,7 @@ export default function AdminAuditoriaPage() {
                   {r.usuario ? (
                     <span title={r.usuario.email}>{r.usuario.nombre}</span>
                   ) : (
-                    <span className="text-musgo">sistema</span>
+                    <span className="text-musgo">{t('admin.auditoria.system')}</span>
                   )}
                 </td>
                 <td className="px-3 py-2">
@@ -160,7 +164,7 @@ export default function AdminAuditoriaPage() {
         </table>
 
         {!cargando && filas.length === 0 && (
-          <p className="p-8 text-center text-sm text-musgo">No hay registros con ese filtro.</p>
+          <p className="p-8 text-center text-sm text-musgo">{t('admin.auditoria.empty')}</p>
         )}
       </div>
 
@@ -172,7 +176,7 @@ export default function AdminAuditoriaPage() {
             onClick={() => cargar(cursor, false)}
             className="rounded-md border border-tinta px-5 py-2 text-sm font-medium hover:bg-white disabled:opacity-60"
           >
-            {cargando ? 'Cargando…' : 'Ver más'}
+            {cargando ? t('common.loading') : t('admin.auditoria.loadMore')}
           </button>
         </div>
       )}

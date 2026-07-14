@@ -40,3 +40,6 @@ graphify-out/cache/
 # Artefactos de tests e2e (Playwright)
 test-results/
 playwright-report/
+
+# Credenciales locales de prueba (no compartir)
+usuarios.md

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../lib/auth';
 
 // Claves de filtro que forman parte de una búsqueda guardada (§5.2). Excluye
@@ -22,6 +23,7 @@ const CLAVES_CRITERIO = [
 ] as const;
 
 export function GuardarBusqueda() {
+  const t = useT();
   const { usuario, fetchAuth } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,10 +51,10 @@ export function GuardarBusqueda() {
 
   if (estado === 'ok') {
     return (
-      <p className="mt-3 rounded-md border border-borde bg-crema px-3 py-2 text-center text-xs text-musgo">
-        Búsqueda guardada.{' '}
-        <a href="/busquedas" className="font-medium text-quetzal hover:underline">
-          Ver mis búsquedas
+      <p className="mt-3 rounded-md border border-borde bg-lienzo px-3 py-2 text-center text-xs text-musgo">
+        {t('guardarBusqueda.saved')}{' '}
+        <a href="/busquedas" className="font-medium text-acento hover:underline">
+          {t('guardarBusqueda.viewMine')}
         </a>
       </p>
     );
@@ -63,13 +65,13 @@ export function GuardarBusqueda() {
       type="button"
       onClick={guardar}
       disabled={estado === 'guardando'}
-      className="mt-3 w-full rounded-md border border-quetzal px-4 py-2 text-sm font-medium text-quetzal hover:bg-crema disabled:opacity-60"
+      className="mt-3 w-full rounded-md border border-acento px-4 py-2 text-sm font-medium text-acento hover:bg-lienzo disabled:opacity-60"
     >
       {estado === 'guardando'
-        ? 'Guardando…'
+        ? t('guardarBusqueda.saving')
         : estado === 'error'
-          ? 'No se pudo guardar — reintentar'
-          : 'Guardar esta búsqueda'}
+          ? t('guardarBusqueda.error')
+          : t('guardarBusqueda.save')}
     </button>
   );
 }

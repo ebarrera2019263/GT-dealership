@@ -7,7 +7,7 @@ export type CanalLeadStr = (typeof CANALES_LEAD)[number];
 export const leadCrearSchema = z
   .object({
     vehiculoId: z.number().int().positive(),
-    nombre: z.string().trim().min(2).max(120),
+    nombre: z.string().trim().min(2, 'Ingresá tu nombre').max(120),
     telefono: z
       .string()
       .regex(/^\+?\d{8,15}$/, 'Teléfono inválido')

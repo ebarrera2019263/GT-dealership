@@ -4,12 +4,15 @@ import { Filtros } from '@/components/filtros';
 import { GuardarBusqueda } from '@/components/guardar-busqueda';
 import { VehiculoCard } from '@/components/vehiculo-card';
 import { listarVehiculos, obtenerCarrocerias, obtenerMarcas } from '@/lib/api';
+import { getI18n } from '@/lib/i18n/server';
 
-export const metadata: Metadata = {
-  title: 'Vehículos usados en venta',
-  description:
-    'Explorá vehículos usados en venta en Guatemala: filtrá por marca, precio, año y ubicación.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: t('autos.metaTitle'),
+    description: t('autos.metaDescription'),
+  };
+}
 
 const FILTROS_VALIDOS = [
   'marca',
@@ -29,6 +32,7 @@ export default async function ListadoPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { t } = await getI18n();
   const sp = await searchParams;
   const params = new URLSearchParams();
   const valores: Record<string, string | undefined> = {};
@@ -56,11 +60,8 @@ export default async function ListadoPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <header className="max-w-2xl">
-        <h1 className="titular text-[length:var(--text-display)] text-tinta">Vehículos en venta</h1>
-        <p className="mt-2 text-musgo">
-          Explorá el mercado y filtrá por marca, precio, año y ubicación. El precio manda: todo se
-          compara en quetzales.
-        </p>
+        <h1 className="titular text-[length:var(--text-display)] text-tinta">{t('autos.title')}</h1>
+        <p className="mt-2 text-musgo">{t('autos.subtitle')}</p>
       </header>
 
       <div className="mt-8 flex flex-col gap-8 md:flex-row">
@@ -71,7 +72,7 @@ export default async function ListadoPage({
             open
           >
             <summary className="cursor-pointer font-display text-base font-semibold text-tinta md:pointer-events-none md:list-none">
-              Filtros
+              {t('autos.filters')}
             </summary>
             <div className="mt-4">
               <Filtros marcas={marcas} carrocerias={carrocerias} valores={valores} />
@@ -84,14 +85,21 @@ export default async function ListadoPage({
           {cantidad === 0 ? (
             <div className="rounded-2xl border border-borde bg-superficie p-12 text-center">
               <p className="font-display text-lg font-semibold text-tinta">
-                No hay anuncios con esos filtros.
+                {t('autos.emptyTitle')}
               </p>
               <p className="mt-2 text-sm text-musgo">
-                Probá quitar algún filtro o{' '}
-                <Link href="/autos" className="font-medium text-quetzal hover:underline">
-                  ver todos los vehículos
-                </Link>
-                .
+                {(() => {
+                  const [antes, despues] = t('autos.emptyHint').split('{link}');
+                  return (
+                    <>
+                      {antes}
+                      <Link href="/autos" className="font-medium text-acento hover:underline">
+                        {t('autos.emptyLink')}
+                      </Link>
+                      {despues}
+                    </>
+                  );
+                })()}
               </p>
             </div>
           ) : (
@@ -99,16 +107,16 @@ export default async function ListadoPage({
               <p className="mb-5 text-sm text-musgo">
                 <span className="cifra font-semibold text-tinta">{cantidad}</span>
                 {siguienteCursor ? '+ ' : ' '}
-                {cantidad === 1 ? 'vehículo' : 'vehículos'} en esta vista
+                {cantidad === 1 ? t('autos.countOne') : t('autos.countMany')}
               </p>
-              <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rejilla-autos grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {resultados.map((v, i) => (
                   <div
                     key={v.id}
-                    className="emerge"
-                    style={{ animationDelay: `${Math.min(i, 9) * 45}ms` }}
+                    className="tarjeta-elevada"
+                    style={{ animationDelay: `${Math.min(i, 11) * 55}ms` }}
                   >
-                    <VehiculoCard vehiculo={v} />
+                    <VehiculoCard vehiculo={v} prioridad={i < 3} />
                   </div>
                 ))}
               </div>
@@ -116,9 +124,9 @@ export default async function ListadoPage({
                 <div className="mt-12 text-center">
                   <Link
                     href={`/autos?${paramsSiguiente.toString()}`}
-                    className="inline-block rounded-full border border-tinta/20 px-6 py-2.5 font-medium text-tinta transition-colors hover:border-quetzal hover:text-quetzal"
+                    className="inline-block rounded-full border border-tinta/20 px-6 py-2.5 font-medium text-tinta transition-colors hover:border-acento hover:text-acento"
                   >
-                    Ver más resultados
+                    {t('autos.loadMore')}
                   </Link>
                 </div>
               )}

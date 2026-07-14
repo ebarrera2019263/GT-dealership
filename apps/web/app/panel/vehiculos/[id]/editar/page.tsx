@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import {
   FormularioVehiculo,
   type PayloadVehiculo,
@@ -69,6 +70,7 @@ function aValores(v: VehiculoEdicion): ValoresVehiculo {
 }
 
 export default function EditarVehiculoPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -111,9 +113,7 @@ export default function EditarVehiculoPage() {
     const cuerpo = await res.json().catch(() => null);
     setEnviando(false);
     if (!res.ok) {
-      setError(
-        cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? 'No se pudieron guardar los cambios',
-      );
+      setError(cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? t('editar.saveError'));
       return;
     }
     setGuardado(true);
@@ -121,15 +121,17 @@ export default function EditarVehiculoPage() {
   }
 
   if (cargando || estadoCarga === 'cargando') {
-    return <main className="mx-auto max-w-3xl px-4 py-12 text-sm text-musgo">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-12 text-sm text-musgo">{t('common.loading')}</main>
+    );
   }
 
   if (estadoCarga === 'noEncontrado' || !vehiculo) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-musgo">No se encontró el anuncio o no es tuyo.</p>
-        <Link href="/panel" className="mt-3 inline-block font-medium text-quetzal hover:underline">
-          Volver a mis anuncios
+        <p className="text-musgo">{t('editar.notFound')}</p>
+        <Link href="/panel" className="mt-3 inline-block font-medium text-acento hover:underline">
+          {t('editar.backToListings')}
         </Link>
       </main>
     );
@@ -139,42 +141,50 @@ export default function EditarVehiculoPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <Link href="/panel" className="text-sm text-musgo hover:text-quetzal">
-        ← Mis anuncios
+      <Link href="/panel" className="text-sm text-musgo hover:text-acento">
+        {t('editar.backShort')}
       </Link>
-      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">Editar anuncio</h1>
+      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">{t('editar.title')}</h1>
 
       {guardado && (
-        <p className="mt-4 rounded-md border border-quetzal bg-quetzal/10 px-3 py-2 text-sm text-quetzal">
-          Cambios guardados.
+        <p className="mt-4 rounded-md border border-acento bg-acento/10 px-3 py-2 text-sm text-acento">
+          {t('editar.saved')}
         </p>
       )}
 
       {!editable ? (
-        <div className="mt-6 rounded-lg border border-borde bg-white p-6">
+        <div className="mt-6 rounded-lg border border-borde bg-superficie p-6">
           <p className="text-sm text-musgo">
-            Este anuncio está <strong>{vehiculo.estado.replace('_', ' ')}</strong>. Para editarlo,
-            primero pausalo desde{' '}
-            <Link href="/panel" className="font-medium text-quetzal hover:underline">
-              Mis anuncios
-            </Link>
-            . Solo se editan anuncios en borrador, rechazados o pausados.
+            {(() => {
+              const [antes, despues] = t('editar.notEditable', {
+                estado: vehiculo.estado.replace('_', ' '),
+              }).split('{link}');
+              return (
+                <>
+                  {antes}
+                  <Link href="/panel" className="font-medium text-acento hover:underline">
+                    {t('editar.myListings')}
+                  </Link>
+                  {despues}
+                </>
+              );
+            })()}
           </p>
         </div>
       ) : (
         <>
           <FormularioVehiculo
             inicial={aValores(vehiculo)}
-            textoSubmit="Guardar cambios"
+            textoSubmit={t('editar.saveChanges')}
             enviando={enviando}
             error={error}
             onSubmit={guardar}
           />
           <section className="mt-10 border-t border-borde pt-8">
-            <h2 className="font-display text-xl font-bold tracking-tight">Fotos</h2>
-            <p className="mt-1 text-sm text-musgo">
-              Agregá, quitá o cambiá la foto principal. Los cambios se guardan al instante.
-            </p>
+            <h2 className="font-display text-xl font-bold tracking-tight">
+              {t('editar.photosTitle')}
+            </h2>
+            <p className="mt-1 text-sm text-musgo">{t('editar.photosSubtitle')}</p>
             <div className="mt-4">
               <UploaderFotos vehiculoId={vehiculo.id} inicial={vehiculo.imagenes} />
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../lib/auth';
 
 interface Item {
@@ -23,6 +24,7 @@ export function LookupCatalogo({
   endpoint: string;
   conCategoria?: boolean;
 }) {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
   const [nombre, setNombre] = useState('');
@@ -50,7 +52,7 @@ export function LookupCatalogo({
     });
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
-      setError(cuerpo?.message ?? 'La operación falló');
+      setError(cuerpo?.message ?? t('common.opFailed'));
       return false;
     }
     return true;
@@ -70,40 +72,42 @@ export function LookupCatalogo({
   }
 
   async function renombrar(item: Item) {
-    const nuevo = window.prompt(`Nuevo nombre de "${item.nombre}"`, item.nombre)?.trim();
+    const nuevo = window
+      .prompt(t('lookup.renamePrompt', { nombre: item.nombre }), item.nombre)
+      ?.trim();
     if (!nuevo || nuevo === item.nombre) return;
     if (await enviar(`${base}/${item.id}`, 'PATCH', { nombre: nuevo })) await cargar();
   }
 
   async function eliminar(item: Item) {
-    if (!window.confirm(`¿Borrar "${item.nombre}"?`)) return;
+    if (!window.confirm(t('lookup.deleteConfirm', { nombre: item.nombre }))) return;
     if (await enviar(`${base}/${item.id}`, 'DELETE')) await cargar();
   }
 
   return (
-    <section className="rounded-lg border border-borde bg-white p-4">
+    <section className="rounded-lg border border-borde bg-superficie p-4">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-musgo">{titulo}</h3>
 
       <form onSubmit={agregar} className="mt-2 flex flex-wrap gap-2">
         <input
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          placeholder="Nombre"
-          className="min-w-32 flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+          placeholder={t('lookup.namePlaceholder')}
+          className="min-w-32 flex-1 rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
         />
         {conCategoria && (
           <input
             value={categoria}
             onChange={(e) => setCategoria(e.target.value)}
-            placeholder="Categoría"
-            className="min-w-28 flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+            placeholder={t('lookup.categoryPlaceholder')}
+            className="min-w-28 flex-1 rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
           />
         )}
         <button
           type="submit"
-          className="rounded-md bg-quetzal px-3 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+          className="rounded-md bg-acento px-3 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
         >
-          Agregar
+          {t('lookup.add')}
         </button>
       </form>
 
@@ -120,25 +124,27 @@ export function LookupCatalogo({
               {item.categoria && (
                 <span className="ml-1 text-xs text-musgo">· {item.categoria}</span>
               )}
-              <span className="cifra ml-2 text-xs text-musgo">{item._count.vehiculos} anun</span>
+              <span className="cifra ml-2 text-xs text-musgo">
+                {t('lookup.listingsShort', { n: item._count.vehiculos })}
+              </span>
             </span>
             <button
               type="button"
               onClick={() => renombrar(item)}
-              className="text-xs text-musgo hover:text-quetzal"
+              className="text-xs text-musgo hover:text-acento"
             >
-              Editar
+              {t('lookup.edit')}
             </button>
             <button
               type="button"
               onClick={() => eliminar(item)}
               className="text-xs text-musgo hover:text-red-700"
             >
-              Borrar
+              {t('lookup.delete')}
             </button>
           </li>
         ))}
-        {items.length === 0 && <li className="text-sm text-musgo">Sin registros.</li>}
+        {items.length === 0 && <li className="text-sm text-musgo">{t('lookup.empty')}</li>}
       </ul>
     </section>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { LookupCatalogo } from '../../../components/lookup-catalogo';
 import { useAuth } from '../../../lib/auth';
 
@@ -22,6 +23,7 @@ interface Modelo {
 }
 
 export default function AdminCatalogoPage() {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [seleccion, setSeleccion] = useState<Marca | null>(null);
@@ -33,8 +35,8 @@ export default function AdminCatalogoPage() {
   const cargarMarcas = useCallback(async () => {
     const res = await fetchAuth('/admin/catalogo/marcas');
     if (res.ok) setMarcas(await res.json());
-    else setError('No se pudieron cargar las marcas');
-  }, [fetchAuth]);
+    else setError(t('admin.catalogo.brandsError'));
+  }, [fetchAuth, t]);
 
   const cargarModelos = useCallback(
     async (marcaId: number) => {
@@ -63,7 +65,7 @@ export default function AdminCatalogoPage() {
     });
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
-      setError(cuerpo?.message ?? 'La operación falló');
+      setError(cuerpo?.message ?? t('admin.catalogo.opFailed'));
       return false;
     }
     return true;
@@ -79,7 +81,7 @@ export default function AdminCatalogoPage() {
   }
 
   async function renombrarMarca(m: Marca) {
-    const nombre = window.prompt('Nuevo nombre de la marca', m.nombre)?.trim();
+    const nombre = window.prompt(t('admin.catalogo.renameBrand'), m.nombre)?.trim();
     if (!nombre || nombre === m.nombre) return;
     if (await enviar(`/admin/catalogo/marcas/${m.id}`, 'PATCH', { nombre })) await cargarMarcas();
   }
@@ -105,7 +107,7 @@ export default function AdminCatalogoPage() {
 
   async function renombrarModelo(mod: Modelo) {
     if (!seleccion) return;
-    const nombre = window.prompt('Nuevo nombre del modelo', mod.nombre)?.trim();
+    const nombre = window.prompt(t('admin.catalogo.renameModel'), mod.nombre)?.trim();
     if (!nombre || nombre === mod.nombre) return;
     if (await enviar(`/admin/catalogo/modelos/${mod.id}`, 'PATCH', { nombre }))
       await cargarModelos(seleccion.id);
@@ -119,29 +121,31 @@ export default function AdminCatalogoPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Catálogo maestro</h1>
-      <p className="mt-1 text-sm text-musgo">
-        Marcas y modelos. Desactivar oculta sin borrar datos.
-      </p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">
+        {t('admin.catalogo.title')}
+      </h1>
+      <p className="mt-1 text-sm text-musgo">{t('admin.catalogo.subtitle')}</p>
 
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Marcas */}
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-musgo">Marcas</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-musgo">
+            {t('admin.catalogo.brands')}
+          </h2>
           <form onSubmit={agregarMarca} className="mt-2 flex gap-2">
             <input
               value={nuevaMarca}
               onChange={(e) => setNuevaMarca(e.target.value)}
-              placeholder="Nueva marca"
-              className="flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+              placeholder={t('admin.catalogo.newBrand')}
+              className="flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-md bg-quetzal px-3 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+              className="rounded-md bg-acento px-3 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
             >
-              Agregar
+              {t('admin.catalogo.add')}
             </button>
           </form>
 
@@ -150,7 +154,7 @@ export default function AdminCatalogoPage() {
               <li
                 key={m.id}
                 className={`flex items-center gap-2 rounded-md border px-3 py-2 ${
-                  seleccion?.id === m.id ? 'border-quetzal bg-crema' : 'border-borde bg-white'
+                  seleccion?.id === m.id ? 'border-acento bg-crema' : 'border-borde bg-white'
                 }`}
               >
                 <button
@@ -162,15 +166,18 @@ export default function AdminCatalogoPage() {
                     {m.nombre}
                   </span>
                   <span className="cifra ml-2 text-xs text-musgo">
-                    {m._count.modelos} mod · {m._count.vehiculos} anun
+                    {t('admin.catalogo.countModels', {
+                      modelos: m._count.modelos,
+                      anuncios: m._count.vehiculos,
+                    })}
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => renombrarMarca(m)}
-                  className="text-xs text-musgo hover:text-quetzal"
+                  className="text-xs text-musgo hover:text-acento"
                 >
-                  Editar
+                  {t('admin.catalogo.edit')}
                 </button>
                 <button
                   type="button"
@@ -179,7 +186,7 @@ export default function AdminCatalogoPage() {
                     m.activo ? 'border-green-600 text-green-700' : 'border-red-600 text-red-700'
                   }`}
                 >
-                  {m.activo ? 'Activa' : 'Inactiva'}
+                  {m.activo ? t('admin.catalogo.activeF') : t('admin.catalogo.inactiveF')}
                 </button>
               </li>
             ))}
@@ -189,24 +196,26 @@ export default function AdminCatalogoPage() {
         {/* Modelos de la marca seleccionada */}
         <section>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-musgo">
-            Modelos {seleccion ? `de ${seleccion.nombre}` : ''}
+            {seleccion
+              ? t('admin.catalogo.modelsOf', { marca: seleccion.nombre })
+              : t('admin.catalogo.models')}
           </h2>
           {!seleccion ? (
-            <p className="mt-2 text-sm text-musgo">Elegí una marca para ver sus modelos.</p>
+            <p className="mt-2 text-sm text-musgo">{t('admin.catalogo.pickBrand')}</p>
           ) : (
             <>
               <form onSubmit={agregarModelo} className="mt-2 flex gap-2">
                 <input
                   value={nuevoModelo}
                   onChange={(e) => setNuevoModelo(e.target.value)}
-                  placeholder={`Nuevo modelo de ${seleccion.nombre}`}
-                  className="flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+                  placeholder={t('admin.catalogo.newModelOf', { marca: seleccion.nombre })}
+                  className="flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="rounded-md bg-quetzal px-3 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+                  className="rounded-md bg-acento px-3 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
                 >
-                  Agregar
+                  {t('admin.catalogo.add')}
                 </button>
               </form>
 
@@ -221,15 +230,15 @@ export default function AdminCatalogoPage() {
                     >
                       {mod.nombre}
                       <span className="cifra ml-2 text-xs text-musgo">
-                        {mod._count.vehiculos} anun
+                        {t('admin.catalogo.countListings', { n: mod._count.vehiculos })}
                       </span>
                     </span>
                     <button
                       type="button"
                       onClick={() => renombrarModelo(mod)}
-                      className="text-xs text-musgo hover:text-quetzal"
+                      className="text-xs text-musgo hover:text-acento"
                     >
-                      Editar
+                      {t('admin.catalogo.edit')}
                     </button>
                     <button
                       type="button"
@@ -240,12 +249,12 @@ export default function AdminCatalogoPage() {
                           : 'border-red-600 text-red-700'
                       }`}
                     >
-                      {mod.activo ? 'Activo' : 'Inactivo'}
+                      {mod.activo ? t('admin.catalogo.activeM') : t('admin.catalogo.inactiveM')}
                     </button>
                   </li>
                 ))}
                 {modelos.length === 0 && (
-                  <li className="text-sm text-musgo">Esta marca todavía no tiene modelos.</li>
+                  <li className="text-sm text-musgo">{t('admin.catalogo.noModels')}</li>
                 )}
               </ul>
             </>
@@ -254,9 +263,13 @@ export default function AdminCatalogoPage() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <LookupCatalogo titulo="Carrocerías" endpoint="carrocerias" />
-        <LookupCatalogo titulo="Combustibles" endpoint="combustibles" />
-        <LookupCatalogo titulo="Características" endpoint="caracteristicas" conCategoria />
+        <LookupCatalogo titulo={t('admin.catalogo.bodyTypes')} endpoint="carrocerias" />
+        <LookupCatalogo titulo={t('admin.catalogo.fuels')} endpoint="combustibles" />
+        <LookupCatalogo
+          titulo={t('admin.catalogo.features')}
+          endpoint="caracteristicas"
+          conCategoria
+        />
       </div>
     </div>
   );

@@ -1,87 +1,94 @@
 'use client';
 
+import { leadCrearSchema } from '@concesionario/shared';
 import { useState } from 'react';
+import { CampoValidado, estiloControlValidado } from '@/components/ui/campo-validado';
+import { useT } from '@/lib/i18n/provider';
+import { useValidacion } from '@/lib/validacion';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 type Estado = 'inicial' | 'enviando' | 'enviado' | 'error';
 
 export function FormularioLead({ vehiculoId }: { vehiculoId: number }) {
+  const t = useT();
   const [estado, setEstado] = useState<Estado>('inicial');
   const [mensajeError, setMensajeError] = useState('');
 
+  const v = useValidacion(leadCrearSchema, (c) => ({
+    vehiculoId,
+    nombre: c.nombre ?? '',
+    telefono: c.telefono?.trim() ? c.telefono.trim() : undefined,
+    email: c.email?.trim() ? c.email.trim() : undefined,
+    canal: 'formulario' as const,
+  }));
+
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
+    const datos = v.validar();
+    if (!datos) return;
     setEstado('enviando');
     try {
       const res = await fetch(`${API_URL}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vehiculoId,
-          nombre: form.get('nombre'),
-          telefono: form.get('telefono') || undefined,
-          email: form.get('email') || undefined,
-          canal: 'formulario',
-        }),
+        body: JSON.stringify(datos),
       });
       if (!res.ok) {
         const cuerpo = await res.json().catch(() => null);
-        throw new Error(cuerpo?.errores?.[0]?.detalle ?? 'No se pudo enviar el mensaje');
+        throw new Error(cuerpo?.errores?.[0]?.detalle ?? t('lead.sendError'));
       }
       setEstado('enviado');
     } catch (err) {
-      setMensajeError(err instanceof Error ? err.message : 'No se pudo enviar el mensaje');
+      setMensajeError(err instanceof Error ? err.message : t('lead.sendError'));
       setEstado('error');
     }
   }
 
   if (estado === 'enviado') {
     return (
-      <div className="rounded-md border border-quetzal bg-white p-4 text-sm">
-        <p className="font-medium text-quetzal">Mensaje enviado</p>
-        <p className="mt-1 text-musgo">El vendedor recibió tus datos y te va a contactar.</p>
+      <div className="rounded-md border border-acento bg-superficie p-4 text-sm">
+        <p className="font-medium text-acento">{t('lead.sentTitle')}</p>
+        <p className="mt-1 text-musgo">{t('lead.sentBody')}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-xs font-medium uppercase tracking-wide text-musgo">Tu nombre</span>
-        <input required name="nombre" minLength={2} maxLength={120} className={estiloControl} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-xs font-medium uppercase tracking-wide text-musgo">Teléfono</span>
+    <form onSubmit={enviar} noValidate className="flex flex-col gap-3">
+      <CampoValidado etiqueta={t('lead.name')} nombre="nombre" error={v.errorDe('nombre')}>
+        <input {...v.campo('nombre')} autoComplete="name" className={estiloControlValidado} />
+      </CampoValidado>
+      <CampoValidado etiqueta={t('lead.phone')} nombre="telefono" error={v.errorDe('telefono')}>
         <input
-          name="telefono"
+          {...v.campo('telefono')}
           type="tel"
-          pattern="\+?\d{8,15}"
+          inputMode="tel"
           placeholder="50212345678"
-          className={estiloControl}
+          className={estiloControlValidado}
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-xs font-medium uppercase tracking-wide text-musgo">
-          Email (si no dejás teléfono)
-        </span>
-        <input name="email" type="email" className={estiloControl} />
-      </label>
-      {estado === 'error' && <p className="text-sm text-red-700">{mensajeError}</p>}
+      </CampoValidado>
+      <CampoValidado etiqueta={t('lead.emailIfNoPhone')} nombre="email" error={v.errorDe('email')}>
+        <input
+          {...v.campo('email')}
+          type="email"
+          autoComplete="email"
+          className={estiloControlValidado}
+        />
+      </CampoValidado>
+      {estado === 'error' && (
+        <p role="alert" className="text-sm text-red-700">
+          {mensajeError}
+        </p>
+      )}
       <button
         type="submit"
         disabled={estado === 'enviando'}
-        className="rounded-md bg-quetzal px-4 py-2 font-medium text-white hover:bg-quetzal-oscuro disabled:opacity-60"
+        className="rounded-md bg-acento px-4 py-2 font-medium text-white hover:bg-acento-oscuro disabled:opacity-60"
       >
-        {estado === 'enviando' ? 'Enviando…' : 'Contactar al vendedor'}
+        {estado === 'enviando' ? t('lead.sending') : t('lead.submit')}
       </button>
-      <p className="text-xs text-musgo">
-        Dejá al menos un teléfono o un email para que te respondan.
-      </p>
+      <p className="text-xs text-musgo">{t('lead.hint')}</p>
     </form>
   );
 }
-
-const estiloControl =
-  'w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none';

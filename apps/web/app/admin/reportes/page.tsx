@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../../lib/auth';
 
 interface Reporte {
@@ -19,16 +20,8 @@ interface Reporte {
   };
 }
 
-const MOTIVO_LABEL: Record<string, string> = {
-  fraude: 'Estafa',
-  duplicado: 'Duplicado',
-  datos_falsos: 'Datos falsos',
-  ya_vendido: 'Ya vendido',
-  inapropiado: 'Inapropiado',
-  otro: 'Otro',
-};
-
 export default function AdminReportesPage() {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [filas, setFilas] = useState<Reporte[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
@@ -44,7 +37,7 @@ export default function AdminReportesPage() {
       if (desde) params.set('cursor', String(desde));
       const res = await fetchAuth(`/admin/reportes?${params.toString()}`);
       if (!res.ok) {
-        setError('No se pudieron cargar los reportes');
+        setError(t('admin.reportes.loadError'));
         setCargando(false);
         return;
       }
@@ -54,7 +47,7 @@ export default function AdminReportesPage() {
       setError('');
       setCargando(false);
     },
-    [estado, fetchAuth],
+    [estado, fetchAuth, t],
   );
 
   useEffect(() => {
@@ -65,29 +58,31 @@ export default function AdminReportesPage() {
     setFilas((xs) => xs.filter((x) => x.id !== id));
     const res = await fetchAuth(`/admin/reportes/${id}/resolver`, { method: 'PATCH' });
     if (!res.ok) {
-      setError('No se pudo resolver el reporte');
+      setError(t('admin.reportes.resolveError'));
       void cargar(null, true);
     }
   }
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Reportes</h1>
-      <p className="mt-1 text-sm text-musgo">Denuncias de anuncios enviadas por los usuarios.</p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">
+        {t('admin.reportes.title')}
+      </h1>
+      <p className="mt-1 text-sm text-musgo">{t('admin.reportes.subtitle')}</p>
 
       <div className="mt-4 flex items-center gap-2">
         <label className="text-sm text-musgo" htmlFor="filtro-estado">
-          Estado
+          {t('admin.reportes.state')}
         </label>
         <select
           id="filtro-estado"
           value={estado}
           onChange={(e) => setEstado(e.target.value)}
-          className="rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+          className="rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
         >
-          <option value="abierto">Abiertos</option>
-          <option value="resuelto">Resueltos</option>
-          <option value="">Todos</option>
+          <option value="abierto">{t('admin.reportes.open')}</option>
+          <option value="resuelto">{t('admin.reportes.resolved')}</option>
+          <option value="">{t('admin.reportes.all')}</option>
         </select>
       </div>
 
@@ -100,22 +95,22 @@ export default function AdminReportesPage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800">
-                    {MOTIVO_LABEL[r.motivo] ?? r.motivo}
+                    {t(`admin.reportes.motivo.${r.motivo}`)}
                   </span>
                   {r.estado === 'resuelto' && (
                     <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-800">
-                      Resuelto
+                      {t('admin.reportes.resolvedTag')}
                     </span>
                   )}
                 </div>
                 <a
                   href={`/autos/${r.vehiculo.slug}`}
-                  className="mt-1 block font-medium hover:text-quetzal"
+                  className="mt-1 block font-medium hover:text-acento"
                 >
                   {r.vehiculo.marca.nombre} {r.vehiculo.modelo.nombre} {r.vehiculo.anio}
                 </a>
                 <p className="cifra text-xs text-musgo">
-                  Anuncio #{r.vehiculo.id} · {r.vehiculo.estado}
+                  {t('admin.reportes.listingNum', { id: r.vehiculo.id, estado: r.vehiculo.estado })}
                 </p>
                 {r.detalle && <p className="mt-2 text-sm text-musgo">{r.detalle}</p>}
               </div>
@@ -123,9 +118,9 @@ export default function AdminReportesPage() {
                 <button
                   type="button"
                   onClick={() => resolver(r.id)}
-                  className="shrink-0 rounded-md bg-quetzal px-3 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+                  className="shrink-0 rounded-md bg-acento px-3 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
                 >
-                  Marcar resuelto
+                  {t('admin.reportes.markResolved')}
                 </button>
               )}
             </div>
@@ -135,7 +130,7 @@ export default function AdminReportesPage() {
 
       {!cargando && filas.length === 0 && (
         <div className="mt-6 rounded-lg border border-dashed border-borde p-10 text-center text-musgo">
-          No hay reportes con ese filtro. 🎉
+          {t('admin.reportes.empty')}
         </div>
       )}
 
@@ -147,7 +142,7 @@ export default function AdminReportesPage() {
             onClick={() => cargar(cursor, false)}
             className="rounded-md border border-tinta px-5 py-2 text-sm font-medium hover:bg-white disabled:opacity-60"
           >
-            {cargando ? 'Cargando…' : 'Ver más'}
+            {cargando ? t('common.loading') : t('admin.reportes.loadMore')}
           </button>
         </div>
       )}

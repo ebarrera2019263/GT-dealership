@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../../lib/auth';
 
 interface Lead {
@@ -29,6 +30,7 @@ function fecha(iso: string): string {
 }
 
 export default function AdminLeadsPage() {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [filas, setFilas] = useState<Lead[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
@@ -42,7 +44,7 @@ export default function AdminLeadsPage() {
       if (desde) params.set('cursor', String(desde));
       const res = await fetchAuth(`/admin/leads?${params.toString()}`);
       if (!res.ok) {
-        setError('No se pudieron cargar los leads');
+        setError(t('admin.leads.loadError'));
         setCargando(false);
         return;
       }
@@ -52,7 +54,7 @@ export default function AdminLeadsPage() {
       setError('');
       setCargando(false);
     },
-    [fetchAuth],
+    [fetchAuth, t],
   );
 
   useEffect(() => {
@@ -61,8 +63,8 @@ export default function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Leads</h1>
-      <p className="mt-1 text-sm text-musgo">Contactos recibidos por anuncio.</p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">{t('admin.leads.title')}</h1>
+      <p className="mt-1 text-sm text-musgo">{t('admin.leads.subtitle')}</p>
 
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
@@ -70,11 +72,11 @@ export default function AdminLeadsPage() {
         <table className="w-full min-w-[720px] text-sm">
           <thead className="border-b border-borde text-left text-xs uppercase tracking-wide text-musgo">
             <tr>
-              <th className="px-3 py-2 font-semibold">Fecha</th>
-              <th className="px-3 py-2 font-semibold">Interesado</th>
-              <th className="px-3 py-2 font-semibold">Contacto</th>
-              <th className="px-3 py-2 font-semibold">Canal</th>
-              <th className="px-3 py-2 font-semibold">Anuncio</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.leads.colDate')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.leads.colInterested')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.leads.colContact')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.leads.colChannel')}</th>
+              <th className="px-3 py-2 font-semibold">{t('admin.leads.colListing')}</th>
             </tr>
           </thead>
           <tbody>
@@ -89,11 +91,11 @@ export default function AdminLeadsPage() {
                   <span className="rounded bg-crema px-1.5 py-0.5 text-xs">{l.canal}</span>
                 </td>
                 <td className="px-3 py-2">
-                  <a href={`/autos/${l.vehiculo.slug}`} className="hover:text-quetzal">
+                  <a href={`/autos/${l.vehiculo.slug}`} className="hover:text-acento">
                     {l.vehiculo.marca.nombre} {l.vehiculo.modelo.nombre} {l.vehiculo.anio}
                   </a>
                   <span className="block text-xs text-musgo">
-                    vendedor: {l.vehiculo.usuario.nombre}
+                    {t('admin.leads.sellerLabel', { nombre: l.vehiculo.usuario.nombre })}
                   </span>
                 </td>
               </tr>
@@ -102,7 +104,7 @@ export default function AdminLeadsPage() {
         </table>
 
         {!cargando && filas.length === 0 && (
-          <p className="p-8 text-center text-sm text-musgo">Todavía no hay leads.</p>
+          <p className="p-8 text-center text-sm text-musgo">{t('admin.leads.empty')}</p>
         )}
       </div>
 
@@ -114,7 +116,7 @@ export default function AdminLeadsPage() {
             onClick={() => cargar(cursor, false)}
             className="rounded-md border border-tinta px-5 py-2 text-sm font-medium hover:bg-white disabled:opacity-60"
           >
-            {cargando ? 'Cargando…' : 'Ver más'}
+            {cargando ? t('common.loading') : t('admin.leads.loadMore')}
           </button>
         </div>
       )}

@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { VehiculoCard } from '../../components/vehiculo-card';
 import type { VehiculoResumen } from '../../lib/api';
 import { useAuth } from '../../lib/auth';
 
 export default function FavoritosPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const [vehiculos, setVehiculos] = useState<VehiculoResumen[] | null>(null);
@@ -27,23 +29,25 @@ export default function FavoritosPage() {
   }, [cargando, usuario, router, cargar]);
 
   if (cargando || !usuario) {
-    return <main className="mx-auto max-w-6xl px-4 py-12 text-sm text-musgo">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-12 text-sm text-musgo">{t('common.loading')}</main>
+    );
   }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Favoritos</h1>
-      <p className="mt-1 text-sm text-musgo">Los vehículos que guardaste.</p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">{t('favoritos.title')}</h1>
+      <p className="mt-1 text-sm text-musgo">{t('favoritos.subtitle')}</p>
 
       {vehiculos && vehiculos.length === 0 && (
         <div className="mt-10 rounded-lg border border-dashed border-borde p-10 text-center text-musgo">
-          Todavía no guardaste ningún vehículo. Tocá el corazón en cualquier anuncio.
+          {t('favoritos.empty')}
           <div>
             <Link
               href="/autos"
-              className="mt-3 inline-block font-medium text-quetzal hover:underline"
+              className="mt-3 inline-block font-medium text-acento hover:underline"
             >
-              Explorar vehículos
+              {t('favoritos.explore')}
             </Link>
           </div>
         </div>

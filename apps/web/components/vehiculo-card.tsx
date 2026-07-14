@@ -1,26 +1,39 @@
+'use client';
+
 import { Check } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { VehiculoResumen } from '@/lib/api';
 import { formatearKm } from '@/lib/formato';
+import { useT } from '@/lib/i18n/provider';
 import { BotonFavorito } from './boton-favorito';
 import { PlacaPrecio } from './placa-precio';
 
-export function VehiculoCard({ vehiculo }: { vehiculo: VehiculoResumen }) {
+export function VehiculoCard({
+  vehiculo,
+  prioridad = false,
+}: {
+  vehiculo: VehiculoResumen;
+  /** Marca la foto como LCP (priority) — usar solo en las cards sobre el pliegue. */
+  prioridad?: boolean;
+}) {
+  const t = useT();
   const foto = vehiculo.imagenes[0];
   return (
     <Link
       href={`/autos/${vehiculo.slug}`}
-      className="group relative flex flex-col rounded-xl outline-none transition-transform duration-200 ease-[var(--ease-salida)] focus-visible:ring-2 focus-visible:ring-quetzal focus-visible:ring-offset-2 focus-visible:ring-offset-papel active:scale-[0.99]"
+      className="group relative flex flex-col rounded-xl outline-none transition-transform duration-200 ease-[var(--ease-salida)] focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 focus-visible:ring-offset-papel active:scale-[0.99]"
     >
       {/* Foto: protagonista. Zoom sutil al hover, contenida por el radio. */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-lienzo ring-1 ring-borde/70 transition-[box-shadow,transform] duration-300 ease-[var(--ease-salida)] group-hover:-translate-y-1 group-hover:shadow-[var(--sombra-carta)]">
         {foto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={foto.urlThumb ?? foto.url}
             alt={`${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`}
-            className="h-full w-full object-cover transition-transform duration-500 ease-[var(--ease-salida)] group-hover:scale-[1.04]"
-            loading="lazy"
+            fill
+            priority={prioridad}
+            sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
+            className="object-cover transition-transform duration-500 ease-[var(--ease-salida)] group-hover:scale-[1.04]"
           />
         ) : (
           <div className="flex h-full items-center justify-center font-display text-lg font-semibold uppercase tracking-[0.2em] text-musgo/70">
@@ -31,14 +44,14 @@ export function VehiculoCard({ vehiculo }: { vehiculo: VehiculoResumen }) {
         {/* Etiquetas discretas, esquina superior izquierda */}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {vehiculo.destacado && (
-            <span className="rounded-full bg-ambar px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-tinta shadow-sm">
-              Destacado
+            <span className="rounded-full bg-ambar px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#141d19] shadow-sm">
+              {t('card.featured')}
             </span>
           )}
           {vehiculo.verificado && (
-            <span className="flex items-center gap-1 rounded-full bg-tinta/85 px-2.5 py-1 text-[11px] font-medium text-papel backdrop-blur-sm">
+            <span className="flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
               <Check className="size-3" strokeWidth={3} aria-hidden="true" />
-              Verificado
+              {t('card.verified')}
             </span>
           )}
         </div>

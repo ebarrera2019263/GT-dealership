@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../lib/auth';
 
 export function ContactarVendedor({
@@ -14,6 +15,7 @@ export function ContactarVendedor({
   vendedorId: number;
   slug: string;
 }) {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const [enviando, setEnviando] = useState(false);
@@ -27,12 +29,12 @@ export function ContactarVendedor({
   if (!usuario) {
     return (
       <div className="rounded-md border border-borde bg-papel p-3 text-sm">
-        <p className="text-musgo">Enviá un mensaje al vendedor desde tu cuenta.</p>
+        <p className="text-musgo">{t('contactar.fromAccount')}</p>
         <Link
           href={`/entrar?destino=/autos/${slug}`}
-          className="mt-2 inline-block rounded-md bg-quetzal px-3 py-1.5 font-medium text-white hover:bg-quetzal-oscuro"
+          className="mt-2 inline-block rounded-md bg-acento px-3 py-1.5 font-medium text-white hover:bg-acento-oscuro"
         >
-          Entrar para escribir
+          {t('contactar.loginToWrite')}
         </Link>
       </div>
     );
@@ -42,7 +44,7 @@ export function ContactarVendedor({
   if (usuario.id === vendedorId) {
     return (
       <p className="rounded-md border border-borde bg-papel p-3 text-sm text-musgo">
-        Este es tu anuncio.
+        {t('contactar.yourListing')}
       </p>
     );
   }
@@ -61,7 +63,7 @@ export function ContactarVendedor({
     });
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
-      setError(cuerpo?.message ?? 'No se pudo enviar el mensaje');
+      setError(cuerpo?.message ?? t('contactar.sendError'));
       setEnviando(false);
       return;
     }
@@ -73,24 +75,24 @@ export function ContactarVendedor({
     <form onSubmit={enviar} className="flex flex-col gap-2">
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-xs font-medium uppercase tracking-wide text-musgo">
-          Mensaje al vendedor
+          {t('contactar.label')}
         </span>
         <textarea
           name="contenido"
           required
           rows={3}
           maxLength={2000}
-          placeholder="Hola, ¿sigue disponible? ¿Aceptás una prueba de manejo?"
-          className="w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+          placeholder={t('contactar.placeholder')}
+          className="w-full rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
         />
       </label>
       {error && <p className="text-sm text-red-700">{error}</p>}
       <button
         type="submit"
         disabled={enviando}
-        className="rounded-md bg-quetzal px-4 py-2 font-medium text-white hover:bg-quetzal-oscuro disabled:opacity-60"
+        className="rounded-md bg-acento px-4 py-2 font-medium text-white hover:bg-acento-oscuro disabled:opacity-60"
       >
-        {enviando ? 'Enviando…' : 'Enviar mensaje'}
+        {enviando ? t('contactar.sending') : t('contactar.send')}
       </button>
     </form>
   );

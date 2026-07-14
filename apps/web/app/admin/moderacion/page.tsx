@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../../lib/auth';
 import { formatearKm, formatearPrecio } from '../../../lib/formato';
 
@@ -22,6 +23,7 @@ interface Pendiente {
 }
 
 export default function ModeracionPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const [pendientes, setPendientes] = useState<Pendiente[] | null>(null);
@@ -33,11 +35,11 @@ export default function ModeracionPage() {
   const cargar = useCallback(async () => {
     const res = await fetchAuth('/admin/moderacion/pendientes');
     if (!res.ok) {
-      setError('No se pudo cargar la cola de moderación');
+      setError(t('admin.moderacion.loadError'));
       return;
     }
     setPendientes(await res.json());
-  }, [fetchAuth]);
+  }, [fetchAuth, t]);
 
   useEffect(() => {
     if (cargando) return;
@@ -64,7 +66,7 @@ export default function ModeracionPage() {
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
       setError(
-        cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? 'No se pudo completar la acción',
+        cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? t('admin.moderacion.actionError'),
       );
     } else {
       setRechazando(null);
@@ -75,21 +77,23 @@ export default function ModeracionPage() {
   }
 
   if (cargando || !usuario || usuario.rol !== 'admin') {
-    return <main className="mx-auto max-w-4xl px-4 py-12 text-sm text-musgo">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-12 text-sm text-musgo">{t('admin.loading')}</main>
+    );
   }
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Moderación</h1>
-      <p className="mt-1 text-sm text-musgo">
-        Anuncios esperando revisión. Aprobá para publicarlos o rechazá indicando el motivo.
-      </p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">
+        {t('admin.moderacion.title')}
+      </h1>
+      <p className="mt-1 text-sm text-musgo">{t('admin.moderacion.subtitle')}</p>
 
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
       {pendientes && pendientes.length === 0 && (
         <div className="mt-10 rounded-lg border border-dashed border-borde p-10 text-center text-musgo">
-          No hay anuncios pendientes de revisión. 🎉
+          {t('admin.moderacion.empty')}
         </div>
       )}
 
@@ -109,7 +113,7 @@ export default function ModeracionPage() {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-musgo">
-                      sin foto
+                      {t('common.noPhoto')}
                     </div>
                   )}
                 </div>
@@ -127,9 +131,14 @@ export default function ModeracionPage() {
                     <p className="mt-2 line-clamp-2 text-sm text-musgo">{v.descripcion}</p>
                   )}
                   <p className="mt-2 text-xs text-musgo">
-                    Vendedor: {v.usuario.nombre} ({v.usuario.email})
-                    {v.usuario.telefonoVerificado ? ' · tel. verificado' : ''} · {v.imagenes.length}{' '}
-                    foto{v.imagenes.length === 1 ? '' : 's'}
+                    {t('admin.moderacion.sellerLine', {
+                      nombre: v.usuario.nombre,
+                      email: v.usuario.email,
+                    })}
+                    {v.usuario.telefonoVerificado ? t('admin.moderacion.phoneVerified') : ''}
+                    {v.imagenes.length === 1
+                      ? t('admin.moderacion.photoOne', { n: v.imagenes.length })
+                      : t('admin.moderacion.photoMany', { n: v.imagenes.length })}
                   </p>
                 </div>
               </div>
@@ -138,14 +147,14 @@ export default function ModeracionPage() {
                 <div className="flex flex-col gap-2 border-t border-borde bg-papel p-4">
                   <label className="flex flex-col gap-1">
                     <span className="text-xs font-medium uppercase tracking-wide text-musgo">
-                      Motivo del rechazo (mínimo 5 caracteres)
+                      {t('admin.moderacion.reasonLabel')}
                     </span>
                     <textarea
                       value={motivo}
                       onChange={(e) => setMotivo(e.target.value)}
                       rows={2}
-                      placeholder="Ej. Las fotos no muestran el vehículo con claridad."
-                      className="w-full rounded-md border border-borde bg-white px-3 py-2 text-sm focus:border-quetzal focus:outline-none"
+                      placeholder={t('admin.moderacion.reasonPlaceholder')}
+                      className="w-full rounded-md border border-borde bg-white px-3 py-2 text-sm focus:border-acento focus:outline-none"
                     />
                   </label>
                   <div className="flex gap-2">
@@ -155,7 +164,7 @@ export default function ModeracionPage() {
                       onClick={() => moderar(v.id, 'rechazar')}
                       className="rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"
                     >
-                      Confirmar rechazo
+                      {t('admin.moderacion.confirmReject')}
                     </button>
                     <button
                       type="button"
@@ -163,9 +172,9 @@ export default function ModeracionPage() {
                         setRechazando(null);
                         setMotivo('');
                       }}
-                      className="rounded-md border border-borde px-3 py-1.5 text-sm hover:border-quetzal hover:text-quetzal"
+                      className="rounded-md border border-borde px-3 py-1.5 text-sm hover:border-acento hover:text-acento"
                     >
-                      Cancelar
+                      {t('admin.moderacion.cancel')}
                     </button>
                   </div>
                 </div>
@@ -175,9 +184,11 @@ export default function ModeracionPage() {
                     type="button"
                     disabled={ocupado === v.id}
                     onClick={() => moderar(v.id, 'aprobar')}
-                    className="rounded-md bg-quetzal px-4 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro disabled:opacity-60"
+                    className="rounded-md bg-acento px-4 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro disabled:opacity-60"
                   >
-                    {ocupado === v.id ? 'Aprobando…' : 'Aprobar y publicar'}
+                    {ocupado === v.id
+                      ? t('admin.moderacion.approving')
+                      : t('admin.moderacion.approve')}
                   </button>
                   <button
                     type="button"
@@ -189,7 +200,7 @@ export default function ModeracionPage() {
                     }}
                     className="rounded-md border border-borde px-4 py-1.5 text-sm hover:border-red-700 hover:text-red-700 disabled:opacity-60"
                   >
-                    Rechazar
+                    {t('admin.moderacion.reject')}
                   </button>
                 </div>
               )}

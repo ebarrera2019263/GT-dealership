@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../lib/auth';
 
 export function AgendarVisita({
@@ -13,6 +14,7 @@ export function AgendarVisita({
   vendedorId: number;
   slug: string;
 }) {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const [estado, setEstado] = useState<'idle' | 'enviando' | 'ok'>('idle');
   const [error, setError] = useState('');
@@ -26,9 +28,9 @@ export function AgendarVisita({
     return (
       <Link
         href={`/entrar?destino=/autos/${slug}`}
-        className="mt-4 block w-full rounded-md border border-quetzal px-4 py-2 text-center text-sm font-medium text-quetzal hover:bg-crema"
+        className="mt-4 block w-full rounded-md border border-acento px-4 py-2 text-center text-sm font-medium text-acento hover:bg-lienzo"
       >
-        Entrar para agendar una visita
+        {t('agendarVisita.loginToSchedule')}
       </Link>
     );
   }
@@ -40,10 +42,10 @@ export function AgendarVisita({
 
   if (estado === 'ok') {
     return (
-      <p className="mt-4 rounded-md border border-borde bg-crema px-3 py-2 text-center text-xs text-musgo">
-        Visita solicitada. El vendedor la confirmará pronto.{' '}
-        <Link href="/citas" className="font-medium text-quetzal hover:underline">
-          Ver mis visitas
+      <p className="mt-4 rounded-md border border-borde bg-lienzo px-3 py-2 text-center text-xs text-musgo">
+        {t('agendarVisita.requested')}{' '}
+        <Link href="/citas" className="font-medium text-acento hover:underline">
+          {t('agendarVisita.viewMyVisits')}
         </Link>
       </p>
     );
@@ -64,7 +66,7 @@ export function AgendarVisita({
     });
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
-      setError(cuerpo?.message ?? 'No se pudo agendar la visita');
+      setError(cuerpo?.message ?? t('agendarVisita.scheduleError'));
       setEstado('idle');
       return;
     }
@@ -74,21 +76,21 @@ export function AgendarVisita({
   return (
     <form onSubmit={agendar} className="mt-4 border-t border-borde pt-4">
       <p className="mb-2 text-xs font-medium uppercase tracking-wide text-musgo">
-        Agendar una visita
+        {t('agendarVisita.title')}
       </p>
       <input
         type="datetime-local"
         name="fecha"
         required
-        className="w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+        className="w-full rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
       />
       {error && <p className="mt-1 text-sm text-red-700">{error}</p>}
       <button
         type="submit"
         disabled={estado === 'enviando'}
-        className="mt-2 w-full rounded-md bg-quetzal px-4 py-2 text-sm font-medium text-white hover:bg-quetzal-oscuro disabled:opacity-60"
+        className="mt-2 w-full rounded-md bg-acento px-4 py-2 text-sm font-medium text-white hover:bg-acento-oscuro disabled:opacity-60"
       >
-        {estado === 'enviando' ? 'Solicitando…' : 'Solicitar visita'}
+        {estado === 'enviando' ? t('agendarVisita.requesting') : t('agendarVisita.request')}
       </button>
     </form>
   );

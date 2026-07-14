@@ -18,8 +18,8 @@ export const registroSchema = z.object({
 export type RegistroInput = z.infer<typeof registroSchema>;
 
 export const loginSchema = z.object({
-  email: z.email().toLowerCase(),
-  password: z.string().min(1),
+  email: z.email('Email inválido').toLowerCase(),
+  password: z.string().min(1, 'Ingresá tu contraseña'),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

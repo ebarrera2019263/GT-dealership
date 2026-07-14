@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../../lib/auth';
 
 interface Mensaje {
@@ -37,6 +38,7 @@ function hora(iso: string): string {
 }
 
 export default function ConversacionPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -92,18 +94,20 @@ export default function ConversacionPage() {
   }
 
   if (cargando || estado === 'cargando') {
-    return <main className="mx-auto max-w-2xl px-4 py-12 text-sm text-musgo">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12 text-sm text-musgo">{t('common.loading')}</main>
+    );
   }
 
   if (estado === 'error' || !conv) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-12">
-        <p className="text-musgo">No se encontró la conversación o no participás en ella.</p>
+        <p className="text-musgo">{t('conversacion.notFound')}</p>
         <Link
           href="/mensajes"
-          className="mt-3 inline-block font-medium text-quetzal hover:underline"
+          className="mt-3 inline-block font-medium text-acento hover:underline"
         >
-          Volver a mensajes
+          {t('conversacion.backToMessages')}
         </Link>
       </main>
     );
@@ -111,19 +115,19 @@ export default function ConversacionPage() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col px-4 py-6">
-      <Link href="/mensajes" className="text-sm text-musgo hover:text-quetzal">
-        ← Mensajes
+      <Link href="/mensajes" className="text-sm text-musgo hover:text-acento">
+        {t('conversacion.backShort')}
       </Link>
 
-      <div className="mt-3 rounded-lg border border-borde bg-white p-3">
+      <div className="mt-3 rounded-lg border border-borde bg-superficie p-3">
         <p className="text-sm text-musgo">
-          {conv.rolPropio === 'comprador' ? 'Vendedor' : 'Comprador'}:{' '}
+          {conv.rolPropio === 'comprador' ? t('conversacion.seller') : t('conversacion.buyer')}:{' '}
           <span className="font-medium text-tinta">{conv.contraparte.nombre}</span>
         </p>
         {conv.vehiculo && (
           <Link
             href={`/autos/${conv.vehiculo.slug}`}
-            className="text-sm font-medium text-quetzal hover:underline"
+            className="text-sm font-medium text-acento hover:underline"
           >
             {conv.vehiculo.marca.nombre} {conv.vehiculo.modelo.nombre} {conv.vehiculo.anio}
           </Link>
@@ -136,8 +140,8 @@ export default function ConversacionPage() {
             key={m.id}
             className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
               m.mio
-                ? 'self-end bg-quetzal text-white'
-                : 'self-start border border-borde bg-white text-tinta'
+                ? 'self-end bg-acento text-white'
+                : 'self-start border border-borde bg-superficie text-tinta'
             }`}
           >
             <p className="whitespace-pre-line">{m.contenido}</p>
@@ -155,15 +159,15 @@ export default function ConversacionPage() {
           required
           maxLength={2000}
           autoComplete="off"
-          placeholder="Escribí un mensaje…"
-          className="flex-1 rounded-md border border-borde bg-white px-3 py-2 text-sm focus:border-quetzal focus:outline-none"
+          placeholder={t('conversacion.placeholder')}
+          className="flex-1 rounded-md border border-borde bg-papel placeholder:text-musgo px-3 py-2 text-sm focus:border-acento focus:outline-none"
         />
         <button
           type="submit"
           disabled={enviando}
-          className="rounded-md bg-quetzal px-4 py-2 text-sm font-medium text-white hover:bg-quetzal-oscuro disabled:opacity-60"
+          className="rounded-md bg-acento px-4 py-2 text-sm font-medium text-white hover:bg-acento-oscuro disabled:opacity-60"
         >
-          Enviar
+          {t('conversacion.send')}
         </button>
       </form>
     </main>

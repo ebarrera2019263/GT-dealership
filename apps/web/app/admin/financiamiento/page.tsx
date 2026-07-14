@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import { useAuth } from '../../../lib/auth';
 
 interface Entidad {
@@ -37,6 +38,7 @@ const FORM_VACIO = {
 };
 
 export default function AdminFinanciamientoPage() {
+  const t = useT();
   const { fetchAuth } = useAuth();
   const [entidades, setEntidades] = useState<Entidad[]>([]);
   const [seleccion, setSeleccion] = useState<Entidad | null>(null);
@@ -78,7 +80,9 @@ export default function AdminFinanciamientoPage() {
     });
     if (!res.ok) {
       const cuerpo = await res.json().catch(() => null);
-      setError(cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? 'La operación falló');
+      setError(
+        cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? t('admin.financiamiento.opFailed'),
+      );
       return false;
     }
     return true;
@@ -94,7 +98,7 @@ export default function AdminFinanciamientoPage() {
   }
 
   async function renombrarEntidad(ent: Entidad) {
-    const nombre = window.prompt('Nuevo nombre de la entidad', ent.nombre)?.trim();
+    const nombre = window.prompt(t('admin.financiamiento.renameEntity'), ent.nombre)?.trim();
     if (!nombre || nombre === ent.nombre) return;
     if (await enviar(`/admin/financiamiento/entidades/${ent.id}`, 'PATCH', { nombre }))
       await cargarEntidades();
@@ -146,29 +150,31 @@ export default function AdminFinanciamientoPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Financiamiento</h1>
-      <p className="mt-1 text-sm text-musgo">
-        Entidades y sus planes (tasa, plazos, enganche). Alimentan el simulador de la ficha.
-      </p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">
+        {t('admin.financiamiento.title')}
+      </h1>
+      <p className="mt-1 text-sm text-musgo">{t('admin.financiamiento.subtitle')}</p>
 
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[18rem_1fr]">
         {/* Entidades */}
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-musgo">Entidades</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-musgo">
+            {t('admin.financiamiento.entities')}
+          </h2>
           <form onSubmit={agregarEntidad} className="mt-2 flex gap-2">
             <input
               value={nuevaEntidad}
               onChange={(e) => setNuevaEntidad(e.target.value)}
-              placeholder="Nueva entidad"
-              className="flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+              placeholder={t('admin.financiamiento.newEntity')}
+              className="flex-1 rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-md bg-quetzal px-3 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+              className="rounded-md bg-acento px-3 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
             >
-              Agregar
+              {t('admin.financiamiento.add')}
             </button>
           </form>
           <ul className="mt-3 flex flex-col gap-1">
@@ -176,7 +182,7 @@ export default function AdminFinanciamientoPage() {
               <li
                 key={ent.id}
                 className={`flex items-center gap-2 rounded-md border px-3 py-2 ${
-                  seleccion?.id === ent.id ? 'border-quetzal bg-crema' : 'border-borde bg-white'
+                  seleccion?.id === ent.id ? 'border-acento bg-crema' : 'border-borde bg-white'
                 }`}
               >
                 <button
@@ -187,14 +193,16 @@ export default function AdminFinanciamientoPage() {
                   <span className={`font-medium ${ent.activo ? '' : 'text-musgo line-through'}`}>
                     {ent.nombre}
                   </span>
-                  <span className="cifra ml-2 text-xs text-musgo">{ent._count.planes} planes</span>
+                  <span className="cifra ml-2 text-xs text-musgo">
+                    {t('admin.financiamiento.countPlans', { n: ent._count.planes })}
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => renombrarEntidad(ent)}
-                  className="text-xs text-musgo hover:text-quetzal"
+                  className="text-xs text-musgo hover:text-acento"
                 >
-                  Editar
+                  {t('admin.financiamiento.edit')}
                 </button>
                 <button
                   type="button"
@@ -203,7 +211,9 @@ export default function AdminFinanciamientoPage() {
                     ent.activo ? 'border-green-600 text-green-700' : 'border-red-600 text-red-700'
                   }`}
                 >
-                  {ent.activo ? 'Activa' : 'Inactiva'}
+                  {ent.activo
+                    ? t('admin.financiamiento.activeF')
+                    : t('admin.financiamiento.inactiveF')}
                 </button>
               </li>
             ))}
@@ -213,19 +223,22 @@ export default function AdminFinanciamientoPage() {
         {/* Planes */}
         <section>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-musgo">
-            Planes {seleccion ? `de ${seleccion.nombre}` : ''}
+            {seleccion
+              ? t('admin.financiamiento.plansOf', { entidad: seleccion.nombre })
+              : t('admin.financiamiento.plans')}
           </h2>
           {!seleccion ? (
-            <p className="mt-2 text-sm text-musgo">
-              Elegí una entidad para ver y crear sus planes.
-            </p>
+            <p className="mt-2 text-sm text-musgo">{t('admin.financiamiento.pickEntity')}</p>
           ) : (
             <>
               <form
                 onSubmit={guardarPlan}
                 className="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-borde bg-white p-3 sm:grid-cols-3"
               >
-                <Campo etiqueta="Nombre del plan" ancho="col-span-2 sm:col-span-3">
+                <Campo
+                  etiqueta={t('admin.financiamiento.planName')}
+                  ancho="col-span-2 sm:col-span-3"
+                >
                   <input
                     required
                     value={form.nombre}
@@ -233,7 +246,7 @@ export default function AdminFinanciamientoPage() {
                     className={estiloControl}
                   />
                 </Campo>
-                <Campo etiqueta="Tasa anual %">
+                <Campo etiqueta={t('admin.financiamiento.annualRate')}>
                   <input
                     required
                     type="number"
@@ -245,7 +258,7 @@ export default function AdminFinanciamientoPage() {
                     className={estiloControl}
                   />
                 </Campo>
-                <Campo etiqueta="Plazo mín (meses)">
+                <Campo etiqueta={t('admin.financiamiento.minTerm')}>
                   <input
                     required
                     type="number"
@@ -256,7 +269,7 @@ export default function AdminFinanciamientoPage() {
                     className={estiloControl}
                   />
                 </Campo>
-                <Campo etiqueta="Plazo máx (meses)">
+                <Campo etiqueta={t('admin.financiamiento.maxTerm')}>
                   <input
                     required
                     type="number"
@@ -267,7 +280,7 @@ export default function AdminFinanciamientoPage() {
                     className={estiloControl}
                   />
                 </Campo>
-                <Campo etiqueta="Enganche mín %">
+                <Campo etiqueta={t('admin.financiamiento.minDown')}>
                   <input
                     required
                     type="number"
@@ -279,7 +292,7 @@ export default function AdminFinanciamientoPage() {
                     className={estiloControl}
                   />
                 </Campo>
-                <Campo etiqueta="Aplica a">
+                <Campo etiqueta={t('admin.financiamiento.appliesTo')}>
                   <select
                     value={form.aplicaA}
                     onChange={(e) =>
@@ -297,17 +310,19 @@ export default function AdminFinanciamientoPage() {
                 <div className="col-span-2 flex gap-2 sm:col-span-3">
                   <button
                     type="submit"
-                    className="rounded-md bg-quetzal px-4 py-1.5 text-sm font-medium text-white hover:bg-quetzal-oscuro"
+                    className="rounded-md bg-acento px-4 py-1.5 text-sm font-medium text-white hover:bg-acento-oscuro"
                   >
-                    {form.id ? 'Guardar cambios' : 'Agregar plan'}
+                    {form.id
+                      ? t('admin.financiamiento.saveChanges')
+                      : t('admin.financiamiento.addPlan')}
                   </button>
                   {form.id > 0 && (
                     <button
                       type="button"
                       onClick={() => setForm({ ...FORM_VACIO })}
-                      className="rounded-md border border-borde px-4 py-1.5 text-sm hover:border-quetzal hover:text-quetzal"
+                      className="rounded-md border border-borde px-4 py-1.5 text-sm hover:border-acento hover:text-acento"
                     >
-                      Cancelar
+                      {t('admin.financiamiento.cancel')}
                     </button>
                   )}
                 </div>
@@ -324,17 +339,22 @@ export default function AdminFinanciamientoPage() {
                         {p.nombre}
                       </span>
                       <span className="cifra ml-2 text-xs text-musgo">
-                        {p.tasaAnual}% · {p.plazoMin}–{p.plazoMax} meses · enganche{' '}
-                        {p.engancheMinPct}% · {p.aplicaA}
+                        {t('admin.financiamiento.planSummary', {
+                          tasa: p.tasaAnual,
+                          min: p.plazoMin,
+                          max: p.plazoMax,
+                          enganche: p.engancheMinPct,
+                          aplica: p.aplicaA,
+                        })}
                       </span>
                     </div>
                     <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={() => editarPlan(p)}
-                        className="text-xs text-musgo hover:text-quetzal"
+                        className="text-xs text-musgo hover:text-acento"
                       >
-                        Editar
+                        {t('admin.financiamiento.edit')}
                       </button>
                       <button
                         type="button"
@@ -345,13 +365,15 @@ export default function AdminFinanciamientoPage() {
                             : 'border-red-600 text-red-700'
                         }`}
                       >
-                        {p.activo ? 'Activo' : 'Inactivo'}
+                        {p.activo
+                          ? t('admin.financiamiento.activeM')
+                          : t('admin.financiamiento.inactiveM')}
                       </button>
                     </div>
                   </li>
                 ))}
                 {planes.length === 0 && (
-                  <li className="text-sm text-musgo">Esta entidad todavía no tiene planes.</li>
+                  <li className="text-sm text-musgo">{t('admin.financiamiento.noPlans')}</li>
                 )}
               </ul>
             </>
@@ -363,7 +385,7 @@ export default function AdminFinanciamientoPage() {
 }
 
 const estiloControl =
-  'w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none';
+  'w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none';
 
 function Campo({
   etiqueta,

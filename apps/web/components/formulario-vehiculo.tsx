@@ -2,6 +2,7 @@
 
 import { MONEDAS, TRACCIONES } from '@concesionario/shared';
 import { useEffect, useMemo, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 import {
   type Caracteristica,
   cargarCaracteristicas,
@@ -16,7 +17,7 @@ import {
 } from '../lib/catalogo';
 
 const control =
-  'w-full rounded-md border border-borde bg-white px-3 py-2 text-sm focus:border-quetzal focus:outline-none';
+  'w-full rounded-md border border-borde bg-papel placeholder:text-musgo px-3 py-2 text-sm focus:border-acento focus:outline-none';
 const etiqueta = 'text-xs font-medium uppercase tracking-wide text-musgo';
 const ANIO_ACTUAL = new Date().getFullYear();
 
@@ -97,6 +98,7 @@ export function FormularioVehiculo({
   error?: string;
   onSubmit: (payload: PayloadVehiculo) => void;
 }) {
+  const t = useT();
   const [cat, setCat] = useState<Catalogo | null>(null);
   // Selects encadenados: controlados para que la selección sobreviva a la carga
   // asíncrona del catálogo (clave en modo edición).
@@ -190,14 +192,14 @@ export function FormularioVehiculo({
   }
 
   if (!cat) {
-    return <p className="mt-8 text-sm text-musgo">Cargando catálogo…</p>;
+    return <p className="mt-8 text-sm text-musgo">{t('formVehiculo.loadingCatalog')}</p>;
   }
 
   return (
     <form onSubmit={enviar} className="mt-8 flex flex-col gap-6">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Marca</span>
+          <span className={etiqueta}>{t('formVehiculo.brand')}</span>
           <select
             required
             name="marcaId"
@@ -208,7 +210,7 @@ export function FormularioVehiculo({
               setModeloId('');
             }}
           >
-            <option value="">Elegí una marca</option>
+            <option value="">{t('formVehiculo.pickBrand')}</option>
             {cat.marcas.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.nombre}
@@ -217,7 +219,7 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Modelo</span>
+          <span className={etiqueta}>{t('formVehiculo.model')}</span>
           <select
             required
             name="modeloId"
@@ -226,7 +228,9 @@ export function FormularioVehiculo({
             className={control}
             onChange={(e) => setModeloId(e.target.value)}
           >
-            <option value="">{marcaId ? 'Elegí un modelo' : 'Elegí la marca primero'}</option>
+            <option value="">
+              {marcaId ? t('formVehiculo.pickModel') : t('formVehiculo.pickBrandFirst')}
+            </option>
             {modelos.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.nombre}
@@ -235,7 +239,7 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Año</span>
+          <span className={etiqueta}>{t('formVehiculo.year')}</span>
           <input
             required
             name="anio"
@@ -247,14 +251,14 @@ export function FormularioVehiculo({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Carrocería</span>
+          <span className={etiqueta}>{t('formVehiculo.bodyType')}</span>
           <select
             required
             name="carroceriaId"
             defaultValue={inicial?.carroceriaId ?? ''}
             className={control}
           >
-            <option value="">Elegí</option>
+            <option value="">{t('formVehiculo.pick')}</option>
             {cat.carrocerias.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nombre}
@@ -263,12 +267,12 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className={etiqueta}>Versión (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.versionOptional')}</span>
           <input
             name="version"
             maxLength={80}
             defaultValue={inicial?.version ?? ''}
-            placeholder="Ej. XLT, Limited"
+            placeholder={t('formVehiculo.versionPlaceholder')}
             className={control}
           />
         </label>
@@ -276,7 +280,7 @@ export function FormularioVehiculo({
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Precio</span>
+          <span className={etiqueta}>{t('formVehiculo.price')}</span>
           <input
             required
             name="precio"
@@ -288,7 +292,7 @@ export function FormularioVehiculo({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Moneda</span>
+          <span className={etiqueta}>{t('formVehiculo.currency')}</span>
           <select name="moneda" defaultValue={inicial?.moneda ?? 'GTQ'} className={control}>
             {MONEDAS.map((m) => (
               <option key={m} value={m}>
@@ -298,7 +302,7 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Kilometraje</span>
+          <span className={etiqueta}>{t('formVehiculo.mileage')}</span>
           <input
             required
             name="kilometraje"
@@ -315,21 +319,21 @@ export function FormularioVehiculo({
           name="precioNegociable"
           type="checkbox"
           defaultChecked={inicial?.precioNegociable}
-          className="accent-quetzal"
+          className="accent-acento"
         />
-        Precio negociable
+        {t('formVehiculo.negotiable')}
       </label>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Transmisión</span>
+          <span className={etiqueta}>{t('formVehiculo.transmission')}</span>
           <select
             required
             name="transmisionId"
             defaultValue={inicial?.transmisionId ?? ''}
             className={control}
           >
-            <option value="">Elegí</option>
+            <option value="">{t('formVehiculo.pick')}</option>
             {cat.transmisiones.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.nombre}
@@ -338,14 +342,14 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Combustible</span>
+          <span className={etiqueta}>{t('formVehiculo.fuel')}</span>
           <select
             required
             name="combustibleId"
             defaultValue={inicial?.combustibleId ?? ''}
             className={control}
           >
-            <option value="">Elegí</option>
+            <option value="">{t('formVehiculo.pick')}</option>
             {cat.combustibles.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nombre}
@@ -354,7 +358,7 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Tracción (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.drivetrainOptional')}</span>
           <select name="traccion" defaultValue={inicial?.traccion ?? ''} className={control}>
             <option value="">—</option>
             {TRACCIONES.map((t) => (
@@ -365,7 +369,7 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Color (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.colorOptional')}</span>
           <input
             name="color"
             maxLength={40}
@@ -374,7 +378,7 @@ export function FormularioVehiculo({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Puertas (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.doorsOptional')}</span>
           <input
             name="puertas"
             type="number"
@@ -385,7 +389,7 @@ export function FormularioVehiculo({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Dueños anteriores (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.ownersOptional')}</span>
           <input
             name="numDuenos"
             type="number"
@@ -396,7 +400,7 @@ export function FormularioVehiculo({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Cilindrada L (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.displacementOptional')}</span>
           <input
             name="cilindrada"
             type="number"
@@ -408,7 +412,7 @@ export function FormularioVehiculo({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Potencia HP (opcional)</span>
+          <span className={etiqueta}>{t('formVehiculo.powerOptional')}</span>
           <input
             name="potencia"
             type="number"
@@ -422,7 +426,7 @@ export function FormularioVehiculo({
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Departamento</span>
+          <span className={etiqueta}>{t('formVehiculo.department')}</span>
           <select
             required
             name="departamentoId"
@@ -433,7 +437,7 @@ export function FormularioVehiculo({
               setMunicipioId('');
             }}
           >
-            <option value="">Elegí</option>
+            <option value="">{t('formVehiculo.pick')}</option>
             {cat.departamentos.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.nombre}
@@ -442,7 +446,7 @@ export function FormularioVehiculo({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Municipio</span>
+          <span className={etiqueta}>{t('formVehiculo.municipality')}</span>
           <select
             required
             name="municipioId"
@@ -451,7 +455,9 @@ export function FormularioVehiculo({
             className={control}
             onChange={(e) => setMunicipioId(e.target.value)}
           >
-            <option value="">{departamentoId ? 'Elegí' : 'Elegí el departamento primero'}</option>
+            <option value="">
+              {departamentoId ? t('formVehiculo.pick') : t('formVehiculo.pickDeptFirst')}
+            </option>
             {municipios.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.nombre}
@@ -462,20 +468,20 @@ export function FormularioVehiculo({
       </section>
 
       <label className="flex flex-col gap-1">
-        <span className={etiqueta}>Descripción (opcional)</span>
+        <span className={etiqueta}>{t('formVehiculo.descriptionOptional')}</span>
         <textarea
           name="descripcion"
           maxLength={5000}
           rows={4}
           defaultValue={inicial?.descripcion ?? ''}
-          placeholder="Estado general, mantenimientos, detalles…"
+          placeholder={t('formVehiculo.descriptionPlaceholder')}
           className={control}
         />
       </label>
 
       {caracteristicasPorCategoria.length > 0 && (
         <fieldset className="flex flex-col gap-3">
-          <legend className={etiqueta}>Equipamiento</legend>
+          <legend className={etiqueta}>{t('formVehiculo.equipment')}</legend>
           {caracteristicasPorCategoria.map(([categoria, items]) => (
             <div key={categoria}>
               <p className="mb-1 text-sm font-medium capitalize">{categoria}</p>
@@ -487,7 +493,7 @@ export function FormularioVehiculo({
                       name="caracteristicaIds"
                       value={c.id}
                       defaultChecked={seleccionadas.has(c.id)}
-                      className="accent-quetzal"
+                      className="accent-acento"
                     />
                     {c.nombre}
                   </label>
@@ -502,9 +508,9 @@ export function FormularioVehiculo({
       <button
         type="submit"
         disabled={enviando}
-        className="self-start rounded-md bg-quetzal px-5 py-2.5 font-medium text-white hover:bg-quetzal-oscuro disabled:opacity-60"
+        className="self-start rounded-md bg-acento px-5 py-2.5 font-medium text-white hover:bg-acento-oscuro disabled:opacity-60"
       >
-        {enviando ? 'Guardando…' : textoSubmit}
+        {enviando ? t('formVehiculo.saving') : textoSubmit}
       </button>
     </form>
   );

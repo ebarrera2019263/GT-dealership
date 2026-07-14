@@ -12,6 +12,7 @@ import { SimuladorFinanciamiento } from '@/components/simulador-financiamiento';
 import { VehiculoCard } from '@/components/vehiculo-card';
 import { obtenerFicha, obtenerSimilares } from '@/lib/api';
 import { formatearKm, traccionLegible } from '@/lib/formato';
+import { getI18n } from '@/lib/i18n/server';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -20,7 +21,8 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const v = await obtenerFicha(slug);
-  if (!v) return { title: 'Anuncio no encontrado' };
+  const { t } = await getI18n();
+  if (!v) return { title: t('ficha.notFound') };
   return {
     title: `${v.marca.nombre} ${v.modelo.nombre} ${v.anio}${v.version ? ` ${v.version}` : ''}`,
     description: `${v.marca.nombre} ${v.modelo.nombre} ${v.anio} usado en ${v.departamento.nombre} — ${formatearKm(v.kilometraje)}, ${v.transmision.nombre}, ${v.combustible.nombre}.`,
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FichaPage({ params }: Props) {
   const { slug } = await params;
+  const { t } = await getI18n();
   const vehiculo = await obtenerFicha(slug);
   if (!vehiculo) notFound();
   const similares = await obtenerSimilares(vehiculo.id);
@@ -57,16 +60,16 @@ export default async function FichaPage({ params }: Props) {
   };
 
   const especificaciones: [string, string | null][] = [
-    ['Año', String(vehiculo.anio)],
-    ['Kilometraje', formatearKm(vehiculo.kilometraje)],
-    ['Transmisión', vehiculo.transmision.nombre],
-    ['Combustible', vehiculo.combustible.nombre],
-    ['Carrocería', vehiculo.carroceria.nombre],
-    ['Tracción', traccionLegible(vehiculo.traccion)],
-    ['Puertas', vehiculo.puertas ? String(vehiculo.puertas) : null],
-    ['Color', vehiculo.color],
-    ['Dueños anteriores', vehiculo.numDuenos ? String(vehiculo.numDuenos) : null],
-    ['Ubicación', `${vehiculo.municipio.nombre}, ${vehiculo.departamento.nombre}`],
+    [t('ficha.specYear'), String(vehiculo.anio)],
+    [t('ficha.specMileage'), formatearKm(vehiculo.kilometraje)],
+    [t('ficha.specTransmission'), vehiculo.transmision.nombre],
+    [t('ficha.specFuel'), vehiculo.combustible.nombre],
+    [t('ficha.specBody'), vehiculo.carroceria.nombre],
+    [t('ficha.specDrivetrain'), traccionLegible(vehiculo.traccion)],
+    [t('ficha.specDoors'), vehiculo.puertas ? String(vehiculo.puertas) : null],
+    [t('ficha.specColor'), vehiculo.color],
+    [t('ficha.specOwners'), vehiculo.numDuenos ? String(vehiculo.numDuenos) : null],
+    [t('ficha.specLocation'), `${vehiculo.municipio.nombre}, ${vehiculo.departamento.nombre}`],
   ];
 
   const tituloVehiculo = `${vehiculo.marca.nombre} ${vehiculo.modelo.nombre} ${vehiculo.anio}`;
@@ -80,8 +83,8 @@ export default async function FichaPage({ params }: Props) {
       />
 
       <nav className="text-sm text-musgo">
-        <Link href="/autos" className="hover:text-quetzal">
-          ← Volver al listado
+        <Link href="/autos" className="hover:text-acento">
+          {t('ficha.back')}
         </Link>
       </nav>
 
@@ -111,7 +114,9 @@ export default async function FichaPage({ params }: Props) {
             <BotonFavorito vehiculoId={vehiculo.id} slug={slug} variante="boton" />
           </div>
 
-          <h2 className="mt-10 font-display text-lg font-semibold text-tinta">Especificaciones</h2>
+          <h2 className="mt-10 font-display text-lg font-semibold text-tinta">
+            {t('ficha.specs')}
+          </h2>
           <dl className="mt-3 grid grid-cols-2 overflow-hidden rounded-2xl border border-borde bg-superficie sm:grid-cols-3">
             {especificaciones
               .filter(([, valor]) => valor !== null)
@@ -125,7 +130,9 @@ export default async function FichaPage({ params }: Props) {
 
           {vehiculo.descripcion && (
             <>
-              <h2 className="mt-10 font-display text-lg font-semibold text-tinta">Descripción</h2>
+              <h2 className="mt-10 font-display text-lg font-semibold text-tinta">
+                {t('ficha.description')}
+              </h2>
               <p className="prosa mt-3 whitespace-pre-line leading-relaxed text-tinta/90">
                 {vehiculo.descripcion}
               </p>
@@ -134,7 +141,9 @@ export default async function FichaPage({ params }: Props) {
 
           {vehiculo.caracteristicas.length > 0 && (
             <>
-              <h2 className="mt-10 font-display text-lg font-semibold text-tinta">Equipamiento</h2>
+              <h2 className="mt-10 font-display text-lg font-semibold text-tinta">
+                {t('ficha.equipment')}
+              </h2>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {vehiculo.caracteristicas.map(({ caracteristica }) => (
                   <li
@@ -151,14 +160,14 @@ export default async function FichaPage({ params }: Props) {
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-borde bg-superficie p-5 shadow-[var(--sombra-carta)]">
-            <p className="text-sm text-musgo">Vendido por</p>
+            <p className="text-sm text-musgo">{t('ficha.soldBy')}</p>
             <p className="font-display text-lg font-semibold text-tinta">
               {vehiculo.usuario.nombre}
             </p>
             {vehiculo.usuario.telefonoVerificado && (
-              <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-quetzal">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-quetzal" /> Teléfono
-                verificado
+              <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-acento">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-acento" />{' '}
+                {t('ficha.phoneVerified')}
               </p>
             )}
             <div className="mt-4 border-t border-borde pt-4">
@@ -170,7 +179,7 @@ export default async function FichaPage({ params }: Props) {
             </div>
             <div className="mt-4 border-t border-borde pt-4">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-musgo">
-                O dejá tus datos sin cuenta
+                {t('ficha.leaveDataNoAccount')}
               </p>
               <FormularioLead vehiculoId={vehiculo.id} />
             </div>
@@ -191,7 +200,9 @@ export default async function FichaPage({ params }: Props) {
 
       {similares.length > 0 && (
         <section className="mt-16 border-t border-borde pt-10">
-          <h2 className="titular text-[length:var(--text-display)] text-tinta">Similares a este</h2>
+          <h2 className="titular text-[length:var(--text-display)] text-tinta">
+            {t('ficha.similar')}
+          </h2>
           <div className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {similares.map((v) => (
               <VehiculoCard key={v.id} vehiculo={v} />

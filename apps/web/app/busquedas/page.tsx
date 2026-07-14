@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
+import type { TFunction } from '@/lib/i18n/t';
 import { useAuth } from '../../lib/auth';
 
 interface BusquedaGuardada {
@@ -13,27 +15,13 @@ interface BusquedaGuardada {
   novedades: number;
 }
 
-// Etiquetas legibles para los criterios guardados (§5.2). Las claves espejan
-// los filtros del listado, así que "Ver resultados" reconstruye la misma URL.
-const ETIQUETAS: Record<string, string> = {
-  marca: 'Marca',
-  modelo: 'Modelo',
-  carroceria: 'Carrocería',
-  anioMin: 'Año desde',
-  anioMax: 'Año hasta',
-  precioMin: 'Precio mín.',
-  precioMax: 'Precio máx.',
-  kmMax: 'Km máx.',
-  transmisionId: 'Transmisión',
-  combustibleId: 'Combustible',
-  departamentoId: 'Departamento',
-  orden: 'Orden',
-};
-
-function describir(criterios: Record<string, string | number>): string[] {
+// Los criterios guardados (§5.2) espejan los filtros del listado, así que
+// "Ver resultados" reconstruye la misma URL. Las etiquetas se traducen con
+// `busquedas.crit.<clave>`.
+function describir(criterios: Record<string, string | number>, t: TFunction): string[] {
   return Object.entries(criterios)
     .filter(([, v]) => v !== undefined && v !== null && v !== '')
-    .map(([k, v]) => `${ETIQUETAS[k] ?? k}: ${v}`);
+    .map(([k, v]) => `${t(`busquedas.crit.${k}`)}: ${v}`);
 }
 
 function urlResultados(criterios: Record<string, string | number>): string {
@@ -46,6 +34,7 @@ function urlResultados(criterios: Record<string, string | number>): string {
 }
 
 export default function BusquedasPage() {
+  const t = useT();
   const { usuario, cargando, fetchAuth } = useAuth();
   const router = useRouter();
   const [busquedas, setBusquedas] = useState<BusquedaGuardada[] | null>(null);
@@ -87,25 +76,25 @@ export default function BusquedasPage() {
   }
 
   if (cargando || !usuario) {
-    return <main className="mx-auto max-w-4xl px-4 py-12 text-sm text-musgo">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-12 text-sm text-musgo">{t('common.loading')}</main>
+    );
   }
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Búsquedas guardadas</h1>
-      <p className="mt-1 text-sm text-musgo">
-        Guardá una búsqueda desde los filtros del listado y te avisamos cuándo hay anuncios nuevos.
-      </p>
+      <h1 className="font-display text-3xl font-bold tracking-tight">{t('busquedas.title')}</h1>
+      <p className="mt-1 text-sm text-musgo">{t('busquedas.subtitle')}</p>
 
       {busquedas && busquedas.length === 0 && (
         <div className="mt-10 rounded-lg border border-dashed border-borde p-10 text-center text-musgo">
-          Todavía no guardaste ninguna búsqueda.
+          {t('busquedas.empty')}
           <div>
             <Link
               href="/autos"
-              className="mt-3 inline-block font-medium text-quetzal hover:underline"
+              className="mt-3 inline-block font-medium text-acento hover:underline"
             >
-              Ir a buscar vehículos
+              {t('busquedas.goSearch')}
             </Link>
           </div>
         </div>
@@ -114,27 +103,32 @@ export default function BusquedasPage() {
       {busquedas && busquedas.length > 0 && (
         <ul className="mt-6 flex flex-col gap-3">
           {busquedas.map((b) => {
-            const chips = describir(b.criterios);
+            const chips = describir(b.criterios, t);
             return (
-              <li key={b.id} className="rounded-lg border border-borde bg-white p-4">
+              <li key={b.id} className="rounded-lg border border-borde bg-superficie p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-1.5">
                       {chips.length > 0 ? (
                         chips.map((c) => (
-                          <span key={c} className="rounded bg-crema px-2 py-0.5 text-xs text-tinta">
+                          <span
+                            key={c}
+                            className="rounded bg-lienzo px-2 py-0.5 text-xs text-tinta"
+                          >
                             {c}
                           </span>
                         ))
                       ) : (
-                        <span className="text-sm text-musgo">Todos los vehículos</span>
+                        <span className="text-sm text-musgo">{t('busquedas.allVehicles')}</span>
                       )}
                     </div>
                     <p className="cifra mt-2 text-sm text-musgo">
-                      {b.total.toLocaleString('es-GT')} resultados
+                      {t('busquedas.resultsCount', { n: b.total.toLocaleString('es-GT') })}
                       {b.novedades > 0 && (
-                        <span className="ml-2 rounded-full bg-quetzal px-2 py-0.5 text-xs font-semibold text-white">
-                          {b.novedades} nuevo{b.novedades === 1 ? '' : 's'}
+                        <span className="ml-2 rounded-full bg-acento px-2 py-0.5 text-xs font-semibold text-white">
+                          {b.novedades === 1
+                            ? t('busquedas.newOne', { n: b.novedades })
+                            : t('busquedas.newMany', { n: b.novedades })}
                         </span>
                       )}
                     </p>
@@ -145,9 +139,9 @@ export default function BusquedasPage() {
                       type="checkbox"
                       checked={b.alertaActiva}
                       onChange={() => alternarAlerta(b)}
-                      className="accent-quetzal"
+                      className="accent-acento"
                     />
-                    Alerta
+                    {t('busquedas.alert')}
                   </label>
                 </div>
 
@@ -155,17 +149,17 @@ export default function BusquedasPage() {
                   <Link
                     href={urlResultados(b.criterios)}
                     onClick={() => b.novedades > 0 && marcarVisto(b.id)}
-                    className="rounded-md bg-quetzal px-3 py-1.5 font-medium text-white hover:bg-quetzal-oscuro"
+                    className="rounded-md bg-acento px-3 py-1.5 font-medium text-white hover:bg-acento-oscuro"
                   >
-                    Ver resultados
+                    {t('busquedas.viewResults')}
                   </Link>
                   {b.novedades > 0 && (
                     <button
                       type="button"
                       onClick={() => marcarVisto(b.id)}
-                      className="rounded-md border border-borde px-3 py-1.5 hover:bg-crema"
+                      className="rounded-md border border-borde px-3 py-1.5 hover:bg-lienzo"
                     >
-                      Marcar como visto
+                      {t('busquedas.markSeen')}
                     </button>
                   )}
                   <button
@@ -173,7 +167,7 @@ export default function BusquedasPage() {
                     onClick={() => eliminar(b.id)}
                     className="rounded-md border border-borde px-3 py-1.5 text-red-700 hover:bg-red-50"
                   >
-                    Eliminar
+                    {t('busquedas.delete')}
                   </button>
                 </div>
               </li>

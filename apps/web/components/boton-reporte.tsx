@@ -1,22 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useT } from '@/lib/i18n/provider';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
-// Espeja MOTIVOS_REPORTE del backend con etiquetas legibles.
-const MOTIVOS: { valor: string; etiqueta: string }[] = [
-  { valor: 'fraude', etiqueta: 'Parece una estafa' },
-  { valor: 'duplicado', etiqueta: 'Anuncio duplicado' },
-  { valor: 'datos_falsos', etiqueta: 'Datos falsos o engañosos' },
-  { valor: 'ya_vendido', etiqueta: 'Ya se vendió' },
-  { valor: 'inapropiado', etiqueta: 'Contenido inapropiado' },
-  { valor: 'otro', etiqueta: 'Otro' },
-];
+// Espeja MOTIVOS_REPORTE del backend; la etiqueta se traduce con `reporte.<valor>`.
+const MOTIVOS = ['fraude', 'duplicado', 'datos_falsos', 'ya_vendido', 'inapropiado', 'otro'];
 
 type Estado = 'inicial' | 'abierto' | 'enviando' | 'enviado' | 'error';
 
 export function BotonReporte({ vehiculoId }: { vehiculoId: number }) {
+  const t = useT();
   const [estado, setEstado] = useState<Estado>('inicial');
   const [motivo, setMotivo] = useState('fraude');
   const [detalle, setDetalle] = useState('');
@@ -34,21 +29,17 @@ export function BotonReporte({ vehiculoId }: { vehiculoId: number }) {
       });
       if (!res.ok) {
         const cuerpo = await res.json().catch(() => null);
-        throw new Error(cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? 'No se pudo enviar');
+        throw new Error(cuerpo?.errores?.[0]?.detalle ?? cuerpo?.message ?? t('reporte.sendError'));
       }
       setEstado('enviado');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo enviar');
+      setError(err instanceof Error ? err.message : t('reporte.sendError'));
       setEstado('error');
     }
   }
 
   if (estado === 'enviado') {
-    return (
-      <p className="mt-4 text-center text-xs text-musgo">
-        Gracias, recibimos tu reporte. Nuestro equipo lo va a revisar.
-      </p>
-    );
+    return <p className="mt-4 text-center text-xs text-musgo">{t('reporte.thanks')}</p>;
   }
 
   if (estado === 'inicial') {
@@ -58,23 +49,23 @@ export function BotonReporte({ vehiculoId }: { vehiculoId: number }) {
         onClick={() => setEstado('abierto')}
         className="mt-4 block w-full text-center text-xs text-musgo underline hover:text-red-700"
       >
-        Reportar este anuncio
+        {t('reporte.reportListing')}
       </button>
     );
   }
 
   return (
     <form onSubmit={enviar} className="mt-4 flex flex-col gap-2 rounded-md border border-borde p-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-musgo">Reportar anuncio</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-musgo">{t('reporte.title')}</p>
       <select
         value={motivo}
         onChange={(e) => setMotivo(e.target.value)}
-        aria-label="Motivo del reporte"
-        className="w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+        aria-label={t('reporte.reasonAria')}
+        className="w-full rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
       >
         {MOTIVOS.map((m) => (
-          <option key={m.valor} value={m.valor}>
-            {m.etiqueta}
+          <option key={m} value={m}>
+            {t(`reporte.${m}`)}
           </option>
         ))}
       </select>
@@ -83,8 +74,8 @@ export function BotonReporte({ vehiculoId }: { vehiculoId: number }) {
         onChange={(e) => setDetalle(e.target.value)}
         rows={2}
         maxLength={500}
-        placeholder="Detalle (opcional)"
-        className="w-full rounded-md border border-borde bg-white px-2.5 py-1.5 text-sm focus:border-quetzal focus:outline-none"
+        placeholder={t('reporte.detailPlaceholder')}
+        className="w-full rounded-md border border-borde bg-papel placeholder:text-musgo px-2.5 py-1.5 text-sm focus:border-acento focus:outline-none"
       />
       {estado === 'error' && <p className="text-xs text-red-700">{error}</p>}
       <div className="flex gap-2">
@@ -93,14 +84,14 @@ export function BotonReporte({ vehiculoId }: { vehiculoId: number }) {
           disabled={estado === 'enviando'}
           className="rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-60"
         >
-          {estado === 'enviando' ? 'Enviando…' : 'Enviar reporte'}
+          {estado === 'enviando' ? t('reporte.sending') : t('reporte.send')}
         </button>
         <button
           type="button"
           onClick={() => setEstado('inicial')}
-          className="rounded-md border border-borde px-3 py-1.5 text-sm hover:border-quetzal hover:text-quetzal"
+          className="rounded-md border border-borde px-3 py-1.5 text-sm hover:border-acento hover:text-acento"
         >
-          Cancelar
+          {t('reporte.cancel')}
         </button>
       </div>
     </form>
