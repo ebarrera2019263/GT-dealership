@@ -1,0 +1,63 @@
+# Blueprint de Render: web + API + Postgres + Key Value (Redis), todo gratis.
+# En Render: New → Blueprint → conectá el repo GT-dealership → Apply.
+#
+# ⚠️ Las URLs onrender.com se derivan del `name` de cada servicio. Si Render le
+# agrega un sufijo (porque el nombre ya está tomado), actualizá a mano las 3
+# variables marcadas con «# URL fija» con las URLs reales y redeployá la web.
+
+databases:
+  - name: gt-dealership-db
+    databaseName: concesionario
+    user: concesionario
+    plan: free
+
+services:
+  # ─── Redis (Key Value) ───
+  - type: keyvalue
+    name: gt-dealership-redis
+    plan: free
+    ipAllowList: [] # solo acceso interno
+
+  # ─── API (NestJS) ───
+  - type: web
+    name: gt-dealership-api
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @concesionario/shared build && pnpm --filter @concesionario/api db:generate && pnpm --filter @concesionario/api build
+    startCommand: pnpm --filter @concesionario/api db:deploy && pnpm --filter @concesionario/api start
+    healthCheckPath: /api/salud
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gt-dealership-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: gt-dealership-redis
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true # Render genera un secreto seguro
+      - key: PUBLIC_URL
+        value: https://gt-dealership-api.onrender.com # URL fija
+      - key: CORS_ORIGIN
+        value: https://gt-dealership-web.onrender.com # URL fija
+
+  # ─── Web (Next.js) ───
+  - type: web
+    name: gt-dealership-web
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @concesionario/shared build && pnpm --filter @concesionario/web build
+    startCommand: pnpm --filter @concesionario/web start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_API_URL
+        value: https://gt-dealership-api.onrender.com/api # URL fija (se usa en el build)

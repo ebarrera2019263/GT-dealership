@@ -1,11 +1,48 @@
-# Desplegar en Railway (web + API + Postgres + Redis)
+# Desplegar (web + API + Postgres + Redis)
 
 Este proyecto son **4 piezas**: la web (Next.js), la API (NestJS), Postgres y Redis.
 Netlify/Vercel solo hostean la web; para que login/publicar/admin funcionen necesitás
-una plataforma que corra la API y las bases. La más simple para este stack es
-**[Railway](https://railway.app)** (Postgres y Redis con un click, deploy desde este
-mismo repo). Coste: ~US$5/mes de uso (hay crédito de prueba). Alternativa gratuita más
-lenta: Render (los servicios gratis se duermen tras 15 min de inactividad).
+una plataforma que corra la API y las bases.
+
+- **[Render](https://render.com) — GRATIS.** Ver más abajo. Hay un `render.yaml` que
+  provisiona todo con un click. Contra: los servicios gratis se *duermen* tras 15 min
+  de inactividad (la primera visita tarda ~30s en despertar) y el Postgres free caduca
+  a los 90 días.
+- **[Railway](https://railway.app) — ~US$5/mes** (crédito de prueba al inicio). Un poco
+  más simple y sin dormirse. Pasos en la sección de más abajo.
+
+> Antes de empezar: **commiteá y pusheá** todo a `main`. Ambas plataformas despliegan lo
+> que está en GitHub, no lo que tenés local.
+
+---
+
+# Opción A · Render (gratis, con Blueprint)
+
+Ya hay un **`render.yaml`** en la raíz que define los 4 recursos y cablea las variables
+entre ellos. Solo tenés que aplicarlo:
+
+1. Entrá a https://render.com → **Get Started** → *Sign in with GitHub*.
+2. **New → Blueprint** → conectá/elegí el repo **`GT-dealership`** → Render detecta
+   `render.yaml` → **Apply**.
+3. Esperá a que terminen los 4 recursos (el primer build tarda unos minutos). El orden
+   y las variables (`DATABASE_URL`, `REDIS_URL`, `JWT_ACCESS_SECRET`, `CORS_ORIGIN`,
+   `PUBLIC_URL`, `NEXT_PUBLIC_API_URL`) los resuelve el Blueprint solo.
+4. **Datos demo (una sola vez):** en el servicio `gt-dealership-api` → pestaña **Shell**:
+   ```
+   pnpm --filter @concesionario/api db:seed
+   pnpm --filter @concesionario/api exec tsx prisma/seeds/vehiculos-demo.ts
+   ```
+
+Abrí `https://gt-dealership-web.onrender.com`. ¡Listo!
+
+> **Si Render cambió algún nombre** (le agrega un sufijo si ya está tomado), las URLs
+> `onrender.com` no coincidirán. Corregí a mano estas 3 variables con las URLs reales y
+> redeployá la web: `PUBLIC_URL` y `CORS_ORIGIN` (en la API) y `NEXT_PUBLIC_API_URL`
+> (en la web).
+
+---
+
+# Opción B · Railway (de pago, más simple)
 
 > Antes de empezar: **commiteá y pusheá** todo a `main`. Railway despliega lo que está
 > en GitHub, no lo que tenés local.
